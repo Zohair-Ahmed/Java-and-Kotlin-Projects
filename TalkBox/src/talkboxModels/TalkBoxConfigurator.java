@@ -6,6 +6,7 @@ import javax.swing.*;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.RowSpec;
+import net.miginfocom.swing.MigLayout;
 
 /**
  * Aids those with speech impediments to communicate using a 
@@ -22,8 +23,8 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 	private static final long serialVersionUID = 1L;
 	
 	private JFrame frame;
-	private int width = 1000;
-	private int height = 750;
+	private int width = 300;
+	private int height = 300;
 	
 	private int numOfAudioButtons;
 	private int numOfAudioSets;
@@ -63,12 +64,11 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		frame = new JFrame("TalkBox Configurator - Zohair Ahmed");
+		frame = new JFrame("TalkBox Configurator");
 		frame.setSize(this.width, this.height);
 		this.frame.setLocationRelativeTo(null); // center on screen
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.getContentPane().setLayout(new FormLayout(new ColumnSpec[] {},
-			new RowSpec[] {}));
+		frame.getContentPane().setLayout(new MigLayout("", "[]", "[]"));
 	}
 	
 	/*--------- ACCESSORS ---------*/
