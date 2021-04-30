@@ -4,10 +4,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.awt.*;
 import javax.swing.*;
-import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.ColumnSpec;
-import com.jgoodies.forms.layout.RowSpec;
-import net.miginfocom.swing.MigLayout;
 
 /**
  * Aids those with speech impediments to communicate using a sound generating
