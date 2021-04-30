@@ -1,29 +1,78 @@
 package talkboxModels;
 
 import java.nio.file.Path;
-
+import java.awt.*;
 import javax.swing.*;
+import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.forms.layout.ColumnSpec;
+import com.jgoodies.forms.layout.RowSpec;
 
+/**
+ * Aids those with speech impediments to communicate using a 
+ * sound generating device called the TalkBox
+ * 
+ * This class configures the TalkBox, meaning allows the user
+ * to choose which buttons and their associated images can create
+ * which sound
+ * 
+ * @author Zohair Ahmed
+ */
 public class TalkBoxConfigurator implements TalkBoxConfiguration {
 
+	private static final long serialVersionUID = 1L;
+	
+	private JFrame frame;
+	private int width = 1000;
+	private int height = 750;
+	
 	private int numOfAudioButtons;
 	private int numOfAudioSets;
 	private int totalButtons;
-	
-	private int width = 1000;
-	private int height = 750;
 
+	/*---------MAIN METHOD---------*/
+	
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					TalkBoxConfigurator window = new TalkBoxConfigurator();
+					window.frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+	
+	/*---------CONSTRUCTORS---------*/
+
+	/**
+	 * Create the application.
+	 * 
+	 * The configurator that sets the buttons and associating audio for the sound
+	 * generating device, called the TalkBox
+	 */
 	public TalkBoxConfigurator() {
-		JFrame frame = new JFrame("TalkBox Configurator");
-		frame.setSize(width, height);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setLocationRelativeTo(null); // center on screen
-//		JButton button = new JButton("Press");
-//		frame.getContentPane().add(button); // Adds Button to content pane of frame
-		frame.setVisible(true);
+		initialize();
 	}
 
-	/*---------ACCESSORS---------*/
+	/**
+	 * Initialize the contents of the frame.
+	 */
+	private void initialize() {
+		frame = new JFrame("TalkBox Configurator - Zohair Ahmed");
+		frame.setSize(this.width, this.height);
+		this.frame.setLocationRelativeTo(null); // center on screen
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.getContentPane().setLayout(new FormLayout(new ColumnSpec[] {},
+			new RowSpec[] {}));
+	}
+	
+	/*--------- ACCESSORS ---------*/
+
 	@Override
 	public int getNumberOfAudioButtons() {
 		return this.numOfAudioButtons;
@@ -50,5 +99,4 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 }
