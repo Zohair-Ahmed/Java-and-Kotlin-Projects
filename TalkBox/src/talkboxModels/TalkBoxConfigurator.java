@@ -21,20 +21,20 @@ import javax.swing.*;
  */
 public class TalkBoxConfigurator implements TalkBoxConfiguration {
 
+	/*---------GLOBAL VARIABLES---------*/
 	private static final long serialVersionUID = 1L;
 
-	private JFrame frame;
-	//private JPanel mainPanel;
-	private ArrayList<JButton> iconTabButtons;
-	private ArrayList<String> iconImages = new ArrayList<String>();
-	private ArrayList<JButton> audioTabButtons;
+	private JFrame frame; // main frame
+	private int width = 600; // width of main frame
+	private int height = 600; // height of main frame
 
-	private int width = 600;
-	private int height = 600;
+	private ArrayList<JButton> iconTabButtons = new ArrayList<JButton>(); // icon buttons
 
-	private int numOfAudioButtons;
-	private int numOfAudioSets;
-	private int totalButtons;
+	private ArrayList<JButton> audioTabButtons = new ArrayList<JButton>();; // audio buttons
+
+	private int numOfAudioButtons; // number of audio buttons
+	private int numOfAudioSets; // number of audio sets
+	private int totalButtons; // buttons in total
 
 	/*---------MAIN METHOD---------*/
 
@@ -66,6 +66,8 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 		initialize();
 	}
 
+	/*---------MUTATORS---------*/
+
 	/**
 	 * Initialize the contents of the frame.
 	 */
@@ -82,89 +84,105 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 		// ICON AND AUDIO TABS
 		JTabbedPane tabs = new JTabbedPane();
 		tabs.setBackground(Color.BLUE);
-		
-		// grid for icon and audio panel
-		GridLayout grid = new GridLayout(0, 6);
-		grid.setHgap(10);
-		grid.setVgap(10);
-		
+
 		// icon panel
-		JPanel iconPanel = new JPanel();
-		iconPanel.setLayout(grid);
+		JPanel iconPanel = new JPanel(new GridLayout(0, 6, 10, 10));
 		iconPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		tabs.add("Icons", addIcons(this.iconTabButtons, iconPanel));
-		
+
 		// audio panel
-		JPanel audioPanel = new JPanel();
-		audioPanel.setLayout(grid);
+		JPanel audioPanel = new JPanel(new GridLayout(0, 1, 10, 10));
 		audioPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-		tabs.add("Audio", addButtons(this.audioTabButtons, audioPanel));
-		
+		tabs.add("Audio", addAudio(this.audioTabButtons, audioPanel));
+
 		this.frame.getContentPane().add(BorderLayout.SOUTH, tabs);
 		this.frame.pack();
 		this.frame.setVisible(true);
 	}
-	
-	private JScrollPane addButtons(ArrayList<JButton> buttons, JPanel thisPanel) {
-		
-		buttons = new ArrayList<JButton>();
 
-		for (int i = 1; i <= 40; i++) {
-			JButton icon = new JButton("" + i);
-			buttons.add(icon);
-			thisPanel.add(icon);
-		}
-		
-		JScrollPane icons = new JScrollPane(thisPanel);
-		icons.setPreferredSize(new Dimension(this.width, 150));
-		
-		return icons;
-		
-	}
-	
+	/**
+	 * Adds the icon buttons to the JTabbedPane
+	 * 
+	 * @param buttons   - the ArrayList for the buttons created
+	 * @param thisPanel - the JPanel where the buttons are to be displayed
+	 * 
+	 * @return - a JScrollPane of the desired icons as buttons
+	 */
 	private JScrollPane addIcons(ArrayList<JButton> buttons, JPanel thisPanel) {
-		
-		buttons = new ArrayList<JButton>();
-		
+
+		// access icon file
 		File iconFile = new File(".//icons/");
-		String filename;
+
+		// for every icon, create a button that takes shape of the respective icon
+		JButton iconButton; // button
+		BufferedImage buttonImg = null; // image of button
+		String filename; // file of image of button
 		for (File file : iconFile.listFiles()) {
-			filename = file.getName();
-			if (filename.endsWith(".png") && !filename.equals("Sound.png"))
-				this.iconImages.add(filename);
-		}
-		
-		BufferedImage buttonIcon = null;
-		JButton icon;
-		for (String imageFile : this.iconImages) {
 			try {
-				buttonIcon = ImageIO.read(new File(".//icons/" + imageFile));
-				icon = new JButton(new ImageIcon(buttonIcon));
-				icon.setBorder(BorderFactory.createEmptyBorder());
-				icon.setPreferredSize(new Dimension(10, 100));
-				buttons.add(icon);
-				thisPanel.add(icon);
+				filename = file.getName();
+				if (filename.endsWith(".png") && !filename.equals("Sound.png")) {
+					buttonImg = ImageIO.read(new File(".//icons/" + file.getName()));
+					iconButton = new JButton(new ImageIcon(buttonImg));
+					iconButton.setBorder(BorderFactory.createEmptyBorder());
+					iconButton.setPreferredSize(new Dimension(0, 90));
+					buttons.add(iconButton);
+					thisPanel.add(iconButton);
+				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
-		
+
+		// create JScrollPane of the panel icons are being added to
 		JScrollPane icons = new JScrollPane(thisPanel);
 		icons.setPreferredSize(new Dimension(this.width, 150));
-		
+
 		return icons;
 	}
-	
+
+	/**
+	 * Adds the audio buttons to the JTabbedPane
+	 * 
+	 * @param buttons   - the ArrayList holding each audio button
+	 * @param thisPanel - panel audio buttons are added to
+	 * 
+	 * @return - a JScrollPane of the desired audio as buttons
+	 */
 	private JScrollPane addAudio(ArrayList<JButton> buttons, JPanel thisPanel) {
+
+		// access sound file
+		File soundFile = new File(".//sounds");
 		
-		buttons = new ArrayList<JButton>();
-		
-		
-		File iconFile = new File(".//icons/Sound.png");
-		
-		return null;
+		// for every sub-directory in the sounds file,
+		// create a sub-panel for the sub-directory
+		// inside each sub-panel, put respective buttons
+		// for the audio files
+		JButton audioButton;
+		for (File subDir : soundFile.listFiles()) {
+			if (subDir.isDirectory()) {
+				JPanel subPanel = new JPanel(new GridLayout(0, 4));
+				subPanel.setBorder(BorderFactory.createTitledBorder(subDir.getName()));
+				subPanel.setPreferredSize(new Dimension(this.width - 60, 150));
+				thisPanel.add(subPanel);
+				
+				for (File file : subDir.listFiles()) {
+					if (file.getName().endsWith(".wav")) {
+						audioButton = new JButton(file.getName());
+						audioButton.setPreferredSize(new Dimension(0, 0));
+						this.audioTabButtons.add(audioButton);
+						subPanel.add(audioButton);
+					}
+				}
+			} 
+		}
+
+		// create JScrollPane of the panel the audio buttons are being added to
+		JScrollPane audioPanel = new JScrollPane(thisPanel);
+		audioPanel.setPreferredSize(new Dimension(this.width, 150));
+
+		return audioPanel;
 	}
-	
+
 	/*--------- ACCESSORS ---------*/
 
 	@Override
