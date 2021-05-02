@@ -6,7 +6,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
@@ -29,7 +28,6 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 	private int height = 600; // height of main frame
 
 	private ArrayList<JButton> iconTabButtons = new ArrayList<JButton>(); // icon buttons
-
 	private ArrayList<JButton> audioTabButtons = new ArrayList<JButton>();; // audio buttons
 
 	private int numOfAudioButtons; // number of audio buttons
@@ -86,7 +84,7 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 		tabs.setBackground(Color.BLUE);
 
 		// icon panel
-		JPanel iconPanel = new JPanel(new GridLayout(0, 6, 10, 10));
+		JPanel iconPanel = new JPanel(new GridLayout(0, 4, 10, 10));
 		iconPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		tabs.add("Icons", addIcons(this.iconTabButtons, iconPanel));
 
