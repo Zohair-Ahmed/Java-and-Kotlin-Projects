@@ -30,7 +30,12 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 	private ArrayList<JButton> iconTabButtons = new ArrayList<JButton>(); // icon buttons
 	private ArrayList<JButton> audioTabButtons = new ArrayList<JButton>();; // audio buttons
 
-	private int numOfAudioButtons; // number of audio buttons
+	// global so that when click, can mutate other panels
+	JButton addB = new JButton("Add new button"); // add new set of icon and audio for the TalkBox app button
+	JButton recordB = new JButton("Record my own Audio"); // record personal audio button
+	JButton saveB = new JButton("Save"); // record personal audio button
+	JButton clearB = new JButton("Clear"); // clear all buttons in the TalkBox app button
+
 	private int numOfAudioSets; // number of audio sets
 	private int totalButtons; // buttons in total
 
@@ -84,14 +89,18 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 		tabs.setBackground(Color.BLUE);
 
 		// icon panel
-		JPanel iconPanel = new JPanel(new GridLayout(0, 4, 10, 10));
-		iconPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-		tabs.add("Icons", addIcons(this.iconTabButtons, iconPanel));
+		tabs.add("Icons", addIcons(this.iconTabButtons));
 
 		// audio panel
-		JPanel audioPanel = new JPanel(new GridLayout(0, 1, 10, 10));
-		audioPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-		tabs.add("Audio", addAudio(this.audioTabButtons, audioPanel));
+		tabs.add("Audio", addAudio(this.audioTabButtons));
+
+		// BUTTON PANEL
+		this.frame.getContentPane().add(BorderLayout.WEST, buttonPanel());
+
+		// TALKBOX SIMULATOR PANEL
+		this.frame.getContentPane().add(BorderLayout.CENTER, tbDemoPanel());
+		
+		
 
 		this.frame.getContentPane().add(BorderLayout.SOUTH, tabs);
 		this.frame.pack();
@@ -106,7 +115,12 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 	 * 
 	 * @return - a JScrollPane of the desired icons as buttons
 	 */
-	private JScrollPane addIcons(ArrayList<JButton> buttons, JPanel thisPanel) {
+	private JScrollPane addIcons(ArrayList<JButton> buttons) {
+
+		// icon panel
+		JPanel iconPanel = new JPanel(new GridLayout(0, 8, 10, 10));
+		iconPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+		iconPanel.setBackground(Color.WHITE);
 
 		// access icon file
 		File iconFile = new File(".//icons/");
@@ -120,11 +134,11 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 				filename = file.getName();
 				if (filename.endsWith(".png") && !filename.equals("Sound.png")) {
 					buttonImg = ImageIO.read(new File(".//icons/" + file.getName()));
-					iconButton = new JButton(new ImageIcon(buttonImg));
+					iconButton = new JButton(
+							new ImageIcon(buttonImg.getScaledInstance(50, 50, java.awt.Image.SCALE_SMOOTH)));
 					iconButton.setBorder(BorderFactory.createEmptyBorder());
-					iconButton.setPreferredSize(new Dimension(0, 90));
 					buttons.add(iconButton);
-					thisPanel.add(iconButton);
+					iconPanel.add(iconButton);
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -132,7 +146,7 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 		}
 
 		// create JScrollPane of the panel icons are being added to
-		JScrollPane icons = new JScrollPane(thisPanel);
+		JScrollPane icons = new JScrollPane(iconPanel);
 		icons.setPreferredSize(new Dimension(this.width, 150));
 
 		return icons;
@@ -146,11 +160,15 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 	 * 
 	 * @return - a JScrollPane of the desired audio as buttons
 	 */
-	private JScrollPane addAudio(ArrayList<JButton> buttons, JPanel thisPanel) {
+	private JScrollPane addAudio(ArrayList<JButton> buttons) {
+
+		// audio Panel
+		JPanel audioPanel = new JPanel(new GridLayout(0, 1, 10, 10));
+		audioPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
 		// access sound file
 		File soundFile = new File(".//sounds");
-		
+
 		// for every sub-directory in the sounds file,
 		// create a sub-panel for the sub-directory
 		// inside each sub-panel, put respective buttons
@@ -160,32 +178,65 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 			if (subDir.isDirectory()) {
 				JPanel subPanel = new JPanel(new GridLayout(0, 4));
 				subPanel.setBorder(BorderFactory.createTitledBorder(subDir.getName()));
-				subPanel.setPreferredSize(new Dimension(this.width - 60, 150));
-				thisPanel.add(subPanel);
-				
+				audioPanel.add(subPanel);
+
 				for (File file : subDir.listFiles()) {
 					if (file.getName().endsWith(".wav")) {
 						audioButton = new JButton(file.getName());
-						audioButton.setPreferredSize(new Dimension(0, 0));
+						audioButton.setPreferredSize(new Dimension(125, 25));
 						this.audioTabButtons.add(audioButton);
 						subPanel.add(audioButton);
 					}
 				}
-			} 
+			}
 		}
 
 		// create JScrollPane of the panel the audio buttons are being added to
-		JScrollPane audioPanel = new JScrollPane(thisPanel);
-		audioPanel.setPreferredSize(new Dimension(this.width, 150));
+		JScrollPane audios = new JScrollPane(audioPanel);
+		audios.setPreferredSize(new Dimension(this.width, 150));
 
-		return audioPanel;
+		return audios;
+	}
+
+	/**
+	 * Returns a JPanel holding mutator buttons such as add, remove, record
+	 * 
+	 * @return - a JPanel holding mutator buttons such as add, remove, record
+	 */
+	private JPanel buttonPanel() {
+
+		// main panel
+		JPanel buttonPanel = new JPanel(new GridLayout(0, 1, 10, 10));
+		buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+		// add the add, clear and record buttons
+		buttonPanel.add(this.addB);
+		buttonPanel.add(this.recordB);
+		buttonPanel.add(this.saveB);
+		buttonPanel.add(this.clearB);
+
+		return buttonPanel;
+	}
+	
+	private JPanel tbDemoPanel() {
+		
+		JPanel containerPanel = new JPanel(new CardLayout());
+		containerPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+		
+		JPanel innerPanel = new JPanel();
+		innerPanel.setBackground(Color.WHITE);
+		innerPanel.setBorder(BorderFactory.createTitledBorder("TalkBox Demo"));
+
+		containerPanel.add(innerPanel);
+		
+		return containerPanel;
 	}
 
 	/*--------- ACCESSORS ---------*/
 
 	@Override
 	public int getNumberOfAudioButtons() {
-		return this.numOfAudioButtons;
+		return this.audioTabButtons.size();
 	}
 
 	@Override
