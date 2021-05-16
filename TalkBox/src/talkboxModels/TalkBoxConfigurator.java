@@ -218,15 +218,22 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 		return buttonPanel;
 	}
 	
+	/**
+	 * Returns the TalkBox demo panel, which is where the modifications for the 
+	 * main simulator take place
+	 * 
+	 * @return - the TalkBox demo panel
+	 */
 	private JPanel tbDemoPanel() {
 		
+		// outer panel added to help with padding
 		JPanel containerPanel = new JPanel(new CardLayout());
 		containerPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 		
+		// main inner panel
 		JPanel innerPanel = new JPanel();
 		innerPanel.setBackground(Color.WHITE);
 		innerPanel.setBorder(BorderFactory.createTitledBorder("TalkBox Demo"));
-
 		containerPanel.add(innerPanel);
 		
 		return containerPanel;
