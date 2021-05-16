@@ -87,22 +87,16 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 		// ICON AND AUDIO TABS
 		JTabbedPane tabs = new JTabbedPane();
 		tabs.setBackground(Color.BLUE);
-
-		// icon panel
-		tabs.add("Icons", addIcons(this.iconTabButtons));
-
-		// audio panel
-		tabs.add("Audio", addAudio(this.audioTabButtons));
+		tabs.add("Icons", addIcons(this.iconTabButtons)); // icon panel
+		tabs.add("Audio", addAudio(this.audioTabButtons)); // audio panel
+		this.frame.getContentPane().add(BorderLayout.SOUTH, tabs);
 
 		// BUTTON PANEL
 		this.frame.getContentPane().add(BorderLayout.WEST, buttonPanel());
 
 		// TALKBOX SIMULATOR PANEL
 		this.frame.getContentPane().add(BorderLayout.CENTER, tbDemoPanel());
-		
-		
 
-		this.frame.getContentPane().add(BorderLayout.SOUTH, tabs);
 		this.frame.pack();
 		this.frame.setVisible(true);
 	}
