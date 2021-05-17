@@ -1,13 +1,14 @@
 package talkboxModels;
 
-import java.nio.file.Path;
-import java.util.ArrayList;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import javax.swing.*;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
-import javax.swing.*;
+import talkboxModels.TalkboxDemoButton;
 
 /**
  * Aids those with speech impediments to communicate using a sound generating
@@ -177,7 +178,7 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 				for (File file : subDir.listFiles()) {
 					if (file.getName().endsWith(".wav")) {
 						audioButton = new JButton(file.getName());
-						audioButton.setPreferredSize(new Dimension(125, 25));
+						audioButton.setPreferredSize(new Dimension(0, 25));
 						this.audioTabButtons.add(audioButton);
 						subPanel.add(audioButton);
 					}
@@ -225,9 +226,9 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 		containerPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 		
 		// main inner panel
-		JPanel innerPanel = new JPanel();
+		JPanel innerPanel = new JPanel(new GridLayout(0, 2, 10, 10));
 		innerPanel.setBackground(Color.WHITE);
-		innerPanel.setBorder(BorderFactory.createTitledBorder("TalkBox Demo"));
+		innerPanel.setBorder(BorderFactory.createTitledBorder("TalkBox Demo"));		
 		containerPanel.add(innerPanel);
 		
 		return containerPanel;
