@@ -3,9 +3,22 @@ package talkboxModels;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.TimerTask;
 
+import javax.imageio.ImageIO;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 import javax.swing.BorderFactory;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 /**
@@ -18,10 +31,15 @@ import javax.swing.JPanel;
 public class TalkboxDemoButton {
 	
 	/*---------GLOBAL VARIABLES---------*/
+	private String status;
 	private JButton iconButton; // icon button
 	private JButton audioButton; // audio button
 	
+	private Icon iconImage;
+	private Clip audioClip;
+	
 	/*---------CONSTRUCTORS---------*/
+	
 	/**
 	 * This object has a panel, each panel has two buttons.
 	 * One button is for the icon, and the other is for the audio
@@ -35,11 +53,13 @@ public class TalkboxDemoButton {
 		JPanel buttonPanel = new JPanel(new GridLayout(0, 2, 0, 0));
 		buttonPanel.add(this.iconButton);
 		buttonPanel.add(this.audioButton);
-		buttonPanel.updateUI();;
+		buttonPanel.updateUI();
 		
 		p.add(buttonPanel);
 		p.updateUI();
 	}
+	
+	/*---------USER INTERFACE---------*/
 	
 	/**
 	 * Returns a JButton with the specified settings
@@ -55,6 +75,69 @@ public class TalkboxDemoButton {
 		b.setBackground(Color.WHITE);
 		b.setPreferredSize(new Dimension(0, 30));
 		b.setForeground(Color.LIGHT_GRAY);
+		b.addMouseListener(new isSelected());
+		
 		return b;
+	}
+	
+	/*--------- ACCESSORS ---------*/
+	
+	/**
+	 * Returns the status of the most recent talkbox demo button related action
+	 * 
+	 * @return - the status of the most recent talkbox demo button related action
+	 */
+	private String getStatus() {
+		return this.status;
+	}
+	
+//	public void addImage(File iconFile) {
+//		if (getFileExtension(iconFile) != "png") {
+//			this.status = "Please insert .png files only";
+//		} else {
+//			
+//			BufferedImage img = null;
+//			try {
+//				img = ImageIO.read(iconFile);
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
+//			this.iconImage = new ImageIcon(img.getScaledInstance(0, 30, java.awt.Image.SCALE_SMOOTH));
+//			
+//			this.iconButton.setIcon(this.iconImage);
+//		}
+//	}
+	
+	/**
+	 * A private helper method that returns the file extension of a file
+	 * 
+	 * @param file - the Path of the file
+	 * 
+	 * @return - the file extension
+	 */
+	private String getFileExtension(File file) {
+
+		String fileName = file.getName();
+
+		if (fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0)
+			return fileName.substring(fileName.lastIndexOf(".") + 1);
+		
+		return "";
+
+	}
+	
+	private class isSelected extends MouseAdapter {
+
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			 int count = e.getClickCount();
+			
+			if (count == 1) {
+				((JButton) e.getSource()).setBorder(BorderFactory.createDashedBorder(Color.BLUE, 10, 10));
+				((JButton) e.getSource()).setSelected(true);
+			}
+			
+			count = 0;
+		}
 	}
 }

@@ -1,19 +1,22 @@
 package talkboxModels;
 
 import java.awt.*;
+import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import javax.swing.*;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.TimerTask;
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
-
 import talkboxModels.TalkboxDemoButton;
 
 /**
@@ -40,7 +43,6 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 	private ArrayList<JButton> audioTabButtons = new ArrayList<JButton>(); // audio buttons
 	private ArrayList<TalkboxDemoButton> demoButtons = new ArrayList<TalkboxDemoButton>(); // talkbox demo buttons
 
-	
 	// global so that when click, can mutate other panels
 	JButton addB = new JButton("Add new button"); // add new set of icon and audio for the TalkBox app button
 	JButton recordB = new JButton("Record my own Audio"); // record personal audio button
@@ -107,7 +109,7 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 
 		// TALKBOX SIMULATOR PANEL
 		this.frame.getContentPane().add(BorderLayout.CENTER, tbDemoPanel());
-		
+
 		// STATUS PANEL
 		this.frame.getContentPane().add(BorderLayout.NORTH, statusPanel());
 
@@ -147,7 +149,10 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 //					iconButton.setBorder(BorderFactory.createEmptyBorder());
 //					buttons.add(iconButton);
 //					iconPanel.add(iconButton);
-					JLabel img = new JLabel(new ImageIcon(buttonImg.getScaledInstance(50, 50, java.awt.Image.SCALE_SMOOTH)));
+					JLabel img = new JLabel(
+							new ImageIcon(buttonImg.getScaledInstance(50, 50, java.awt.Image.SCALE_SMOOTH)));
+					img.setName(file.getName());
+					img.addMouseListener(new DragMouseAdapter());
 					iconPanel.add(img);
 				}
 			} catch (IOException e) {
@@ -194,9 +199,8 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 				for (File file : subDir.listFiles()) {
 					if (file.getName().endsWith(".wav")) {
 						audioButton = new JButton(file.getName());
-						audioButton.setName(file.getName());
 						audioButton.setPreferredSize(new Dimension(0, 25));
-						audioButton.addActionListener(new PlayAudio());
+						audioButton.addMouseListener(new PlayAudio());
 						this.audioTabButtons.add(audioButton);
 						subPanel.add(audioButton);
 					}
@@ -231,23 +235,25 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 
 		return buttonPanel;
 	}
-	
+
 	/**
 	 * The message panel
 	 * 
-	 * @return - a JPanel informing the users of the status of the Talkbox Configurator
+	 * @return - a JPanel informing the users of the status of the Talkbox
+	 *         Configurator
 	 */
 	private JPanel statusPanel() {
-		
+
 		// main panel
 		JPanel statusPanel = new JPanel(new CardLayout());
-		statusPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10), BorderFactory.createTitledBorder("Log")));
+		statusPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10),
+				BorderFactory.createTitledBorder("Log")));
 		statusPanel.setPreferredSize(new Dimension(this.width - 20, 60));
-		
+
 		// message label
 		status.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 		statusPanel.add(status);
-		
+
 		return statusPanel;
 	}
 
@@ -296,28 +302,59 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 	
 	/**
 	 * Play audio when the respective buttons in the audio tabs is clicked
+	 * If single click, play audio; if double clicked, add audio
 	 */
-	private class PlayAudio implements ActionListener {
+	private class PlayAudio extends MouseAdapter {
 
+		private int clickCount = 0;
+		java.util.Timer timer = new java.util.Timer("doubleClickTimer", false);
 		private AudioInputStream audioIn; // audio file
 		private Clip audio; // audio clip
-		
+
 		@Override
-		public void actionPerformed(ActionEvent arg0) {
+		public void mouseClicked(MouseEvent e) {
 			
-			String panelName = (((JButton) arg0.getSource()).getParent().getName());
-			String buttonName = (((JButton) arg0.getSource()).getName());
-			status.setText(buttonName + " is played");
-			
-			try {
-				this.audioIn = AudioSystem.getAudioInputStream(new File(".//sounds/" + panelName + "/" + buttonName));
-				this.audio = AudioSystem.getClip();
-				this.audio.open(this.audioIn);
-				this.audio.start();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}	
+			this.clickCount = e.getClickCount();
+			timer.schedule(new TimerTask() {
+				
+				@Override
+				public void run() {
+
+					String buttonName = (((JButton) e.getSource()).getText());
+
+					if (clickCount == 1) {
+						
+						String panelName = (((JButton) e.getSource()).getParent().getName());
+						
+						try {
+							audioIn = AudioSystem
+									.getAudioInputStream(new File(".//sounds/" + panelName + "/" + buttonName));
+							audio = AudioSystem.getClip();
+							audio.open(audioIn);
+							status.setText(buttonName + " played");
+							audio.start();
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					
+					} else if (clickCount > 1) {
+						status.setText(buttonName + " added");
+					}
+					clickCount = 0;
+				}
+			}, 300);
+		}
+	}
+
+	private class DragMouseAdapter extends MouseAdapter {
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+            JLabel icon = (JLabel) e.getSource();
+            TransferHandler handler = icon.getTransferHandler();
+            status.setText(icon.getName());
+        }
+    
 	}
 
 	/*--------- ACCESSORS ---------*/
