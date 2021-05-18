@@ -35,12 +35,10 @@ public class TalkboxDemoButton {
 		JPanel buttonPanel = new JPanel(new GridLayout(0, 2, 0, 0));
 		buttonPanel.add(this.iconButton);
 		buttonPanel.add(this.audioButton);
-		
-		buttonPanel.setMaximumSize(new Dimension(0, 30));
-		buttonPanel.setMinimumSize(new Dimension(0, 30));
-		buttonPanel.setPreferredSize(new Dimension(0, 30));
+		buttonPanel.updateUI();;
 		
 		p.add(buttonPanel);
+		p.updateUI();
 	}
 	
 	/**
@@ -53,8 +51,10 @@ public class TalkboxDemoButton {
 	private JButton createButton(String title) {
 		
 		JButton b = new JButton(title);
-		b.setBorder(BorderFactory.createDashedBorder(Color.GRAY));
+		b.setBorder(BorderFactory.createDashedBorder(Color.GRAY, 10, 10));
+		b.setBackground(Color.WHITE);
 		b.setPreferredSize(new Dimension(0, 30));
+		b.setForeground(Color.LIGHT_GRAY);
 		return b;
 	}
 }

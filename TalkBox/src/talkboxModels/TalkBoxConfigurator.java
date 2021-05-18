@@ -1,6 +1,8 @@
 package talkboxModels;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import javax.swing.*;
 import java.nio.file.Path;
@@ -8,6 +10,10 @@ import java.util.ArrayList;
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+
 import talkboxModels.TalkboxDemoButton;
 
 /**
@@ -25,12 +31,16 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 	private static final long serialVersionUID = 1L;
 
 	private JFrame frame; // main frame
-	private int width = 600; // width of main frame
-	private int height = 600; // height of main frame
+	private JPanel innerPanel = new JPanel(new GridLayout(0, 2, 10, 10)); // talkbox demo inner panel
+	private JLabel status = new JLabel("Welcome to the TalkBox Configurator!"); // status messages
+	private int width = 800; // width of main frame
+	private int height = 800; // height of main frame
 
 	private ArrayList<JButton> iconTabButtons = new ArrayList<JButton>(); // icon buttons
-	private ArrayList<JButton> audioTabButtons = new ArrayList<JButton>();; // audio buttons
+	private ArrayList<JButton> audioTabButtons = new ArrayList<JButton>(); // audio buttons
+	private ArrayList<TalkboxDemoButton> demoButtons = new ArrayList<TalkboxDemoButton>(); // talkbox demo buttons
 
+	
 	// global so that when click, can mutate other panels
 	JButton addB = new JButton("Add new button"); // add new set of icon and audio for the TalkBox app button
 	JButton recordB = new JButton("Record my own Audio"); // record personal audio button
@@ -70,7 +80,7 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 		initialize();
 	}
 
-	/*---------MUTATORS---------*/
+	/*---------USER INTERFACE---------*/
 
 	/**
 	 * Initialize the contents of the frame.
@@ -97,6 +107,9 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 
 		// TALKBOX SIMULATOR PANEL
 		this.frame.getContentPane().add(BorderLayout.CENTER, tbDemoPanel());
+		
+		// STATUS PANEL
+		this.frame.getContentPane().add(BorderLayout.NORTH, statusPanel());
 
 		this.frame.pack();
 		this.frame.setVisible(true);
@@ -129,11 +142,13 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 				filename = file.getName();
 				if (filename.endsWith(".png") && !filename.equals("Sound.png")) {
 					buttonImg = ImageIO.read(new File(".//icons/" + file.getName()));
-					iconButton = new JButton(
-							new ImageIcon(buttonImg.getScaledInstance(50, 50, java.awt.Image.SCALE_SMOOTH)));
-					iconButton.setBorder(BorderFactory.createEmptyBorder());
-					buttons.add(iconButton);
-					iconPanel.add(iconButton);
+//					iconButton = new JButton(
+//							new ImageIcon(buttonImg.getScaledInstance(50, 50, java.awt.Image.SCALE_SMOOTH)));
+//					iconButton.setBorder(BorderFactory.createEmptyBorder());
+//					buttons.add(iconButton);
+//					iconPanel.add(iconButton);
+					JLabel img = new JLabel(new ImageIcon(buttonImg.getScaledInstance(50, 50, java.awt.Image.SCALE_SMOOTH)));
+					iconPanel.add(img);
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -173,12 +188,15 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 			if (subDir.isDirectory()) {
 				JPanel subPanel = new JPanel(new GridLayout(0, 4));
 				subPanel.setBorder(BorderFactory.createTitledBorder(subDir.getName()));
+				subPanel.setName(subDir.getName());
 				audioPanel.add(subPanel);
 
 				for (File file : subDir.listFiles()) {
 					if (file.getName().endsWith(".wav")) {
 						audioButton = new JButton(file.getName());
+						audioButton.setName(file.getName());
 						audioButton.setPreferredSize(new Dimension(0, 25));
+						audioButton.addActionListener(new PlayAudio());
 						this.audioTabButtons.add(audioButton);
 						subPanel.add(audioButton);
 					}
@@ -202,10 +220,11 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 
 		// main panel
 		JPanel buttonPanel = new JPanel(new GridLayout(0, 1, 10, 10));
-		buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+		buttonPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 10, 10));
 
 		// add the add, clear and record buttons
 		buttonPanel.add(this.addB);
+		this.addB.addActionListener(new AddDemoButton());
 		buttonPanel.add(this.recordB);
 		buttonPanel.add(this.saveB);
 		buttonPanel.add(this.clearB);
@@ -214,24 +233,91 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 	}
 	
 	/**
-	 * Returns the TalkBox demo panel, which is where the modifications for the 
-	 * main simulator take place
+	 * The message panel
+	 * 
+	 * @return - a JPanel informing the users of the status of the Talkbox Configurator
+	 */
+	private JPanel statusPanel() {
+		
+		// main panel
+		JPanel statusPanel = new JPanel(new CardLayout());
+		statusPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10), BorderFactory.createTitledBorder("Log")));
+		statusPanel.setPreferredSize(new Dimension(this.width - 20, 60));
+		
+		// message label
+		status.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+		statusPanel.add(status);
+		
+		return statusPanel;
+	}
+
+	/**
+	 * Returns the TalkBox demo panel, which is where the modifications for the main
+	 * simulator take place
 	 * 
 	 * @return - the TalkBox demo panel
 	 */
 	private JPanel tbDemoPanel() {
-		
+
 		// outer panel added to help with padding
 		JPanel containerPanel = new JPanel(new CardLayout());
-		containerPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-		
+		containerPanel.setBorder(BorderFactory.createEmptyBorder(10, 15, 15, 15));
+
 		// main inner panel
-		JPanel innerPanel = new JPanel(new GridLayout(0, 2, 10, 10));
-		innerPanel.setBackground(Color.WHITE);
-		innerPanel.setBorder(BorderFactory.createTitledBorder("TalkBox Demo"));		
-		containerPanel.add(innerPanel);
-		
+		this.innerPanel.setBackground(Color.WHITE);
+		this.innerPanel.setBorder(BorderFactory.createTitledBorder("TalkBox Demo"));
+		containerPanel.add(this.innerPanel);
+
 		return containerPanel;
+	}
+
+	/*---------BUTTON FUNCTIONALITY---------*/
+
+	/**
+	 * Functionality for the Add button on the left button panel. Adds a
+	 * TalkboxDemoButton to the inner JPanel
+	 */
+	private class AddDemoButton implements ActionListener {
+
+		private int demoInnerPanelCounter = 12; // a total of 22 TalkBoxDemoButtons can be created
+
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			if (this.demoInnerPanelCounter != 0) {
+				TalkboxDemoButton tdb = new TalkboxDemoButton(innerPanel);
+				this.demoInnerPanelCounter--;
+				status.setText("Added button. " + this.demoInnerPanelCounter + " buttons remaining.");
+			} else {
+				status.setText("Reached maximum button capacity.");
+				((JButton) arg0.getSource()).setEnabled(false);
+			}
+		}
+	}
+	
+	/**
+	 * Play audio when the respective buttons in the audio tabs is clicked
+	 */
+	private class PlayAudio implements ActionListener {
+
+		private AudioInputStream audioIn; // audio file
+		private Clip audio; // audio clip
+		
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			
+			String panelName = (((JButton) arg0.getSource()).getParent().getName());
+			String buttonName = (((JButton) arg0.getSource()).getName());
+			status.setText(buttonName + " is played");
+			
+			try {
+				this.audioIn = AudioSystem.getAudioInputStream(new File(".//sounds/" + panelName + "/" + buttonName));
+				this.audio = AudioSystem.getClip();
+				this.audio.open(this.audioIn);
+				this.audio.start();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}	
 	}
 
 	/*--------- ACCESSORS ---------*/
