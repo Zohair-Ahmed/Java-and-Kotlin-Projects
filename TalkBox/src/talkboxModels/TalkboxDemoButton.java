@@ -1,9 +1,15 @@
 package talkboxModels;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
+
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
@@ -20,6 +26,7 @@ public class TalkboxDemoButton {
 	private String status;
 	private JButton iconButton; // icon button
 	private JButton audioButton; // audio button
+	private JButton removeButton; // audio button
 	
 	//private Icon iconImage;
 	//private Clip audioClip;
@@ -33,12 +40,17 @@ public class TalkboxDemoButton {
 	 * @param p - the JPanel where this constructor is added to
 	 */
 	public TalkboxDemoButton(JPanel p) {
-		this.iconButton = createIconButton();
-		this.audioButton = createAudioButton();
 		
-		JPanel buttonPanel = new JPanel(new GridLayout(0, 2, 0, 0));
-		buttonPanel.add(this.iconButton);
-		buttonPanel.add(this.audioButton);
+		this.iconButton = createButton("Icon");
+		this.audioButton = createButton("Audio");
+		this.removeButton = new JButton("Remove");
+		this.removeButton.addMouseListener(new RemoveDemo());
+		
+		JPanel buttonPanel = new JPanel(new BorderLayout());
+		buttonPanel.add(this.iconButton, BorderLayout.WEST);
+		buttonPanel.add(this.audioButton, BorderLayout.EAST);
+		buttonPanel.add(this.removeButton, BorderLayout.SOUTH);
+		
 		
 		p.add(buttonPanel);
 		p.updateUI();
@@ -56,33 +68,13 @@ public class TalkboxDemoButton {
 	private JButton createButton(String title) {
 		
 		JButton b = new JButton(title);
-		//b.setBorder(BorderFactory.createDashedBorder(Color.GRAY, 10, 10));
 		b.setBackground(Color.WHITE);
-		b.setPreferredSize(new Dimension(0, 30));
 		b.setForeground(Color.LIGHT_GRAY);
 		b.isFocusable();
+		b.setPreferredSize(new Dimension(135, 0));
+		
 		
 		return b;
-	}
-	
-	/**
-	 * Sets the icon button to have the certain actions
-	 * 
-	 * @return - the JButton for the icon
-	 */
-	private JButton createIconButton() {
-		JButton iconButton = createButton("Icon");
-		return iconButton;
-	}
-	
-	/**
-	 * Sets the audio button to have the certain actions
-	 * 
-	 * @return - the JButton for the audio
-	 */
-	private JButton createAudioButton() {
-		JButton audioButton = createButton("Audio");
-		return audioButton;
 	}
 	
 	/*--------- ACCESSORS ---------*/
@@ -130,5 +122,29 @@ public class TalkboxDemoButton {
 		
 		return "";
 
+	}
+	
+	/*---------BUTTON FUNCTIONALITY---------*/
+	
+	/**
+	 * Remove panel 
+	 * @author Zohair
+	 *
+	 */
+	private class RemoveDemo extends MouseAdapter {
+		
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			JButton remove = ((JButton) e.getSource());
+			
+			Container parent = remove.getParent().getParent();
+			parent.remove(remove.getParent());
+			iconButton = null;
+			audioButton = null;
+			removeButton = null;
+			status = null;
+			parent.revalidate();
+			parent.repaint();
+		}
 	}
 }

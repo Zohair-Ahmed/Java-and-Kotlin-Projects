@@ -1,14 +1,12 @@
 package talkboxModels;
 
 import java.awt.*;
-import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import javax.swing.*;
-import javax.swing.border.EtchedBorder;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -37,7 +35,7 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 
 	private JFrame frame; // main frame
 	private JPanel innerPanel = new JPanel(new GridLayout(0, 2, 10, 10)); // talkbox demo inner panel
-	private JLabel status = new JLabel("Welcome to the TalkBox Configurator!"); // status messages
+	protected JLabel status = new JLabel("Welcome to the TalkBox Configurator!"); // status messages
 	private int width = 800; // width of main frame
 	private int height = 800; // height of main frame
 
@@ -391,11 +389,17 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 		}
 	}
 
+	/**
+	 * Allow the focused button in the inner panel to have the desired icon.
+	 * Remove the icon from it's container.
+	 */
 	private class SelectIcon extends MouseAdapter {
 
 		@Override
 		public void mousePressed(MouseEvent e) {
-			Icon icon = ((JLabel) e.getSource()).getIcon();
+			
+			JLabel img = ((JLabel) e.getSource());
+			Icon icon = img.getIcon();
 
 			for (int i = 0; i < demoButtons.size(); i++) {
 
@@ -404,7 +408,12 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 				if (thisButton.hasFocus()) {
 					thisButton.setIcon(icon);
 					thisButton.setText("");
-					status.setText("Added " + ((JLabel) e.getSource()).getName());
+					status.setText("Added " + img.getName());
+					
+					Container parent = img.getParent();
+					parent.remove(img);
+					parent.revalidate();
+					parent.repaint();
 				}
 			}
 		}
