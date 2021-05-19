@@ -51,6 +51,7 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 
 	private int numOfAudioSets; // number of audio sets
 	private int totalButtons; // buttons in total
+	private int demoInnerPanelCounter = 12; // a total of 12 TalkBoxDemoButtons can be created
 
 	/*---------MAIN METHOD---------*/
 
@@ -152,7 +153,7 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 					JLabel img = new JLabel(
 							new ImageIcon(buttonImg.getScaledInstance(50, 50, java.awt.Image.SCALE_SMOOTH)));
 					img.setName(file.getName());
-					img.addMouseListener(new DragMouseAdapter());
+					img.addMouseListener(new SelectIcon());
 					iconPanel.add(img);
 				}
 			} catch (IOException e) {
@@ -230,8 +231,11 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 		buttonPanel.add(this.addB);
 		this.addB.addActionListener(new AddDemoButton());
 		buttonPanel.add(this.recordB);
+		
 		buttonPanel.add(this.saveB);
+		
 		buttonPanel.add(this.clearB);
+		this.clearB.addActionListener(new ClearDemoButton());
 
 		return buttonPanel;
 	}
@@ -285,24 +289,48 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 	 */
 	private class AddDemoButton implements ActionListener {
 
-		private int demoInnerPanelCounter = 12; // a total of 22 TalkBoxDemoButtons can be created
-
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
-			if (this.demoInnerPanelCounter != 0) {
+			if (demoInnerPanelCounter != 0) {
 				TalkboxDemoButton tdb = new TalkboxDemoButton(innerPanel);
-				this.demoInnerPanelCounter--;
-				status.setText("Added button. " + this.demoInnerPanelCounter + " buttons remaining.");
+				demoButtons.add(tdb);
+				demoInnerPanelCounter--;
+				status.setText("Added button. " + demoInnerPanelCounter + " buttons remaining.");
 			} else {
 				status.setText("Reached maximum button capacity.");
 				((JButton) arg0.getSource()).setEnabled(false);
 			}
 		}
 	}
-	
+
 	/**
-	 * Play audio when the respective buttons in the audio tabs is clicked
-	 * If single click, play audio; if double clicked, add audio
+	 * Functionality for the Add button on the left button panel. Clears the Talkbox
+	 * Demo Panel
+	 */
+	private class ClearDemoButton implements ActionListener {
+
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+
+			int confirmClear = JOptionPane.showConfirmDialog(null, "Are you sure you want to clear?", "Clear Message",
+					JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+
+			if (confirmClear == JOptionPane.YES_OPTION) {
+				innerPanel.removeAll();
+				demoButtons.clear();
+				demoInnerPanelCounter = 12;
+				status.setText("TalkBox Demo cleared");
+				innerPanel.updateUI();
+				addB.setEnabled(true);
+			}
+
+		}
+
+	}
+
+	/**
+	 * Play audio when the respective buttons in the audio tabs is clicked If single
+	 * click, play audio; if double clicked, add audio
 	 */
 	private class PlayAudio extends MouseAdapter {
 
@@ -313,19 +341,19 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 
 		@Override
 		public void mouseClicked(MouseEvent e) {
-			
+
 			this.clickCount = e.getClickCount();
 			timer.schedule(new TimerTask() {
-				
+
 				@Override
 				public void run() {
 
 					String buttonName = (((JButton) e.getSource()).getText());
 
 					if (clickCount == 1) {
-						
+
 						String panelName = (((JButton) e.getSource()).getParent().getName());
-						
+
 						try {
 							audioIn = AudioSystem
 									.getAudioInputStream(new File(".//sounds/" + panelName + "/" + buttonName));
@@ -336,7 +364,7 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
-					
+
 					} else if (clickCount > 1) {
 						status.setText(buttonName + " added");
 					}
@@ -346,15 +374,25 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 		}
 	}
 
-	private class DragMouseAdapter extends MouseAdapter {
+	private class SelectIcon extends MouseAdapter {
 
-        @Override
-        public void mousePressed(MouseEvent e) {
-            JLabel icon = (JLabel) e.getSource();
-            TransferHandler handler = icon.getTransferHandler();
-            status.setText(icon.getName());
-        }
-    
+		@Override
+		public void mousePressed(MouseEvent e) {
+			JLabel icon = (JLabel) e.getSource();
+			TransferHandler handler = icon.getTransferHandler();
+			status.setText(icon.getName());
+
+			for (int i = 0; i < demoButtons.size(); i++) {
+
+				JButton thisButton = demoButtons.get(i).getIconButton();
+
+				if (thisButton.isSelected()) {
+					thisButton.setIcon(icon.getIcon());
+					thisButton.setText("");
+				}
+			}
+		}
+
 	}
 
 	/*--------- ACCESSORS ---------*/

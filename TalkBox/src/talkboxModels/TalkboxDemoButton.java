@@ -35,8 +35,11 @@ public class TalkboxDemoButton {
 	private JButton iconButton; // icon button
 	private JButton audioButton; // audio button
 	
-	private Icon iconImage;
-	private Clip audioClip;
+	private static boolean isSelected = false;
+	private static int count = 0;
+	
+	//private Icon iconImage;
+	//private Clip audioClip;
 	
 	/*---------CONSTRUCTORS---------*/
 	
@@ -91,6 +94,15 @@ public class TalkboxDemoButton {
 		return this.status;
 	}
 	
+	/**
+	 * Returns the icon button
+	 * 
+	 * @return -  the icon button
+	 */
+	public JButton getIconButton() {
+		return this.iconButton;
+	}
+	
 //	public void addImage(File iconFile) {
 //		if (getFileExtension(iconFile) != "png") {
 //			this.status = "Please insert .png files only";
@@ -126,11 +138,12 @@ public class TalkboxDemoButton {
 
 	}
 	
-	private class isSelected extends MouseAdapter {
+	private static class isSelected extends MouseAdapter {
 
 		@Override
 		public void mouseClicked(MouseEvent e) {
-			 int count = e.getClickCount();
+			count = e.getClickCount(); 
+			JButton thisButton = (JButton) e.getSource();
 			
 			if (count == 1) {
 				((JButton) e.getSource()).setBorder(BorderFactory.createDashedBorder(Color.BLUE, 10, 10));
