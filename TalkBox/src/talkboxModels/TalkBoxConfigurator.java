@@ -8,6 +8,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import javax.swing.*;
+import javax.swing.border.EtchedBorder;
+
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.TimerTask;
@@ -44,10 +46,10 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 	private ArrayList<TalkboxDemoButton> demoButtons = new ArrayList<TalkboxDemoButton>(); // talkbox demo buttons
 
 	// global so that when click, can mutate other panels
-	JButton addB = new JButton("Add new button"); // add new set of icon and audio for the TalkBox app button
-	JButton recordB = new JButton("Record my own Audio"); // record personal audio button
-	JButton saveB = new JButton("Save"); // record personal audio button
-	JButton clearB = new JButton("Clear"); // clear all buttons in the TalkBox app button
+	private JButton addB = new JButton("Add new button"); // add new set of icon and audio for the TalkBox app button
+	private JButton recordB = new JButton("Record my own Audio"); // record personal audio button
+	private JButton saveB = new JButton("Save"); // record personal audio button
+	private JButton clearB = new JButton("Clear"); // clear all buttons in the TalkBox app button
 
 	private int numOfAudioSets; // number of audio sets
 	private int totalButtons; // buttons in total
@@ -137,7 +139,6 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 		File iconFile = new File(".//icons/");
 
 		// for every icon, create a button that takes shape of the respective icon
-		JButton iconButton; // button
 		BufferedImage buttonImg = null; // image of button
 		String filename; // file of image of button
 		for (File file : iconFile.listFiles()) {
@@ -145,11 +146,6 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 				filename = file.getName();
 				if (filename.endsWith(".png") && !filename.equals("Sound.png")) {
 					buttonImg = ImageIO.read(new File(".//icons/" + file.getName()));
-//					iconButton = new JButton(
-//							new ImageIcon(buttonImg.getScaledInstance(50, 50, java.awt.Image.SCALE_SMOOTH)));
-//					iconButton.setBorder(BorderFactory.createEmptyBorder());
-//					buttons.add(iconButton);
-//					iconPanel.add(iconButton);
 					JLabel img = new JLabel(
 							new ImageIcon(buttonImg.getScaledInstance(50, 50, java.awt.Image.SCALE_SMOOTH)));
 					img.setName(file.getName());
@@ -231,9 +227,9 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 		buttonPanel.add(this.addB);
 		this.addB.addActionListener(new AddDemoButton());
 		buttonPanel.add(this.recordB);
-		
+
 		buttonPanel.add(this.saveB);
-		
+
 		buttonPanel.add(this.clearB);
 		this.clearB.addActionListener(new ClearDemoButton());
 
@@ -348,11 +344,12 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 				@Override
 				public void run() {
 
-					String buttonName = (((JButton) e.getSource()).getText());
+					JButton thisButton = (((JButton) e.getSource()));
+					String buttonName = thisButton.getText();
 
 					if (clickCount == 1) {
 
-						String panelName = (((JButton) e.getSource()).getParent().getName());
+						String panelName = thisButton.getParent().getName();
 
 						try {
 							audioIn = AudioSystem
@@ -366,6 +363,26 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 						}
 
 					} else if (clickCount > 1) {
+						
+						try {
+							
+							BufferedImage soundImage = ImageIO.read(new File(".//icons/Sound.png"));
+							Icon icon = new ImageIcon(soundImage);
+							
+							for (int i = 0; i < demoButtons.size(); i++) {
+								
+								JButton innerButton = demoButtons.get(i).getIconButton();
+								
+								if (innerButton.hasFocus()) {
+									innerButton.setText(buttonName);
+									innerButton.setIcon(icon);
+								}
+							}
+							
+						} catch (IOException e1) {
+							e1.printStackTrace();
+						}
+						
 						status.setText(buttonName + " added");
 					}
 					clickCount = 0;
@@ -378,17 +395,16 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 
 		@Override
 		public void mousePressed(MouseEvent e) {
-			JLabel icon = (JLabel) e.getSource();
-			TransferHandler handler = icon.getTransferHandler();
-			status.setText(icon.getName());
+			Icon icon = ((JLabel) e.getSource()).getIcon();
 
 			for (int i = 0; i < demoButtons.size(); i++) {
 
 				JButton thisButton = demoButtons.get(i).getIconButton();
 
-				if (thisButton.isSelected()) {
-					thisButton.setIcon(icon.getIcon());
+				if (thisButton.hasFocus()) {
+					thisButton.setIcon(icon);
 					thisButton.setText("");
+					status.setText("Added " + ((JLabel) e.getSource()).getName());
 				}
 			}
 		}
