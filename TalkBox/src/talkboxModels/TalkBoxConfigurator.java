@@ -7,7 +7,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import javax.swing.*;
-
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.TimerTask;
@@ -17,7 +16,6 @@ import javax.imageio.ImageIO;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
-import talkboxModels.TalkboxDemoButton;
 
 /**
  * Aids those with speech impediments to communicate using a sound generating
@@ -34,24 +32,23 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 	private static final long serialVersionUID = 1L;
 
 	private JFrame frame; // main frame
+	public static JPanel iconPanel = new JPanel(new GridLayout(0, 8, 10, 10));
 	private JPanel innerPanel = new JPanel(new GridLayout(0, 2, 10, 10)); // talkbox demo inner panel
-	protected JLabel status = new JLabel("Welcome to the TalkBox Configurator!"); // status messages
+	static JLabel status = new JLabel("Welcome to the TalkBox Configurator!"); // status messages
 	private int width = 800; // width of main frame
 	private int height = 800; // height of main frame
 
-	private ArrayList<JButton> iconTabButtons = new ArrayList<JButton>(); // icon buttons
-	private ArrayList<JButton> audioTabButtons = new ArrayList<JButton>(); // audio buttons
-	private ArrayList<TalkboxDemoButton> demoButtons = new ArrayList<TalkboxDemoButton>(); // talkbox demo buttons
+	public static ArrayList<TalkboxDemoButton> demoButtons = new ArrayList<TalkboxDemoButton>(); // talkbox demo buttons
 
 	// global so that when click, can mutate other panels
-	private JButton addB = new JButton("Add new button"); // add new set of icon and audio for the TalkBox app button
+	static JButton addB = new JButton("Add new button"); // add new set of icon and audio for the TalkBox app button
 	private JButton recordB = new JButton("Record my own Audio"); // record personal audio button
 	private JButton saveB = new JButton("Save"); // record personal audio button
 	private JButton clearB = new JButton("Clear"); // clear all buttons in the TalkBox app button
 
 	private int numOfAudioSets; // number of audio sets
 	private int totalButtons; // buttons in total
-	private int demoInnerPanelCounter = 12; // a total of 12 TalkBoxDemoButtons can be created
+	static int demoInnerPanelCounter = 12; // a total of 12 TalkBoxDemoButtons can be created
 
 	/*---------MAIN METHOD---------*/
 
@@ -101,8 +98,8 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 		// ICON AND AUDIO TABS
 		JTabbedPane tabs = new JTabbedPane();
 		tabs.setBackground(Color.BLUE);
-		tabs.add("Icons", addIcons(this.iconTabButtons)); // icon panel
-		tabs.add("Audio", addAudio(this.audioTabButtons)); // audio panel
+		tabs.add("Icons", addIcons()); // icon panel
+		tabs.add("Audio", addAudio()); // audio panel
 		this.frame.getContentPane().add(BorderLayout.SOUTH, tabs);
 
 		// BUTTON PANEL
@@ -126,10 +123,9 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 	 * 
 	 * @return - a JScrollPane of the desired icons as buttons
 	 */
-	private JScrollPane addIcons(ArrayList<JButton> buttons) {
+	private JScrollPane addIcons() {
 
 		// icon panel
-		JPanel iconPanel = new JPanel(new GridLayout(0, 8, 10, 10));
 		iconPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		iconPanel.setBackground(Color.WHITE);
 
@@ -170,7 +166,7 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 	 * 
 	 * @return - a JScrollPane of the desired audio as buttons
 	 */
-	private JScrollPane addAudio(ArrayList<JButton> buttons) {
+	private JScrollPane addAudio() {
 
 		// audio Panel
 		JPanel audioPanel = new JPanel(new GridLayout(0, 1, 10, 10));
@@ -196,7 +192,6 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 						audioButton = new JButton(file.getName());
 						audioButton.setPreferredSize(new Dimension(0, 25));
 						audioButton.addMouseListener(new PlayAudio());
-						this.audioTabButtons.add(audioButton);
 						subPanel.add(audioButton);
 					}
 				}
@@ -222,8 +217,8 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 		buttonPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 10, 10));
 
 		// add the add, clear and record buttons
-		buttonPanel.add(this.addB);
-		this.addB.addActionListener(new AddDemoButton());
+		buttonPanel.add(addB);
+		addB.addActionListener(new AddDemoButton());
 		buttonPanel.add(this.recordB);
 
 		buttonPanel.add(this.saveB);
@@ -361,26 +356,26 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 						}
 
 					} else if (clickCount > 1) {
-						
+
 						try {
-							
+
 							BufferedImage soundImage = ImageIO.read(new File(".//icons/Sound.png"));
 							Icon icon = new ImageIcon(soundImage);
-							
+
 							for (int i = 0; i < demoButtons.size(); i++) {
-								
+
 								JButton innerButton = demoButtons.get(i).getIconButton();
-								
+
 								if (innerButton.hasFocus()) {
 									innerButton.setText(buttonName);
 									innerButton.setIcon(icon);
 								}
 							}
-							
+
 						} catch (IOException e1) {
 							e1.printStackTrace();
 						}
-						
+
 						status.setText(buttonName + " added");
 					}
 					clickCount = 0;
@@ -390,32 +385,53 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 	}
 
 	/**
-	 * Allow the focused button in the inner panel to have the desired icon.
-	 * Remove the icon from it's container.
+	 * Allow the focused button in the inner panel to have the desired icon. Remove
+	 * the icon from it's container.
 	 */
-	private class SelectIcon extends MouseAdapter {
+	public static class SelectIcon extends MouseAdapter {
 
 		@Override
 		public void mousePressed(MouseEvent e) {
-			
+
+			// get icon clicked from icon tab
 			JLabel img = ((JLabel) e.getSource());
 			Icon icon = img.getIcon();
+			JButton focusedButton = null;
 
-			for (int i = 0; i < demoButtons.size(); i++) {
-
-				JButton thisButton = demoButtons.get(i).getIconButton();
-
-				if (thisButton.hasFocus()) {
-					thisButton.setIcon(icon);
-					thisButton.setText("");
-					status.setText("Added " + img.getName());
-					
-					Container parent = img.getParent();
-					parent.remove(img);
-					parent.revalidate();
-					parent.repaint();
+			// search for focused button
+			try {
+				int i = 0;
+				focusedButton = demoButtons.get(i).getIconButton();
+				while (!focusedButton.hasFocus()) {
+					++i;
+					focusedButton = demoButtons.get(i).getIconButton();
 				}
+			} catch (IndexOutOfBoundsException | NullPointerException ex) {
+				status.setText("Please choose a button to have this icon"); // update status
+				return;
 			}
+
+			focusedButton.setText(""); // remove button text
+			status.setText("Added " + img.getName()); // update status
+
+			// if icon already present in focused button, place back in icon tab
+			if (focusedButton.getIcon() != null) {
+				JLabel renewIcon = new JLabel(focusedButton.getIcon());
+				renewIcon.addMouseListener(new SelectIcon());
+				renewIcon.setName(focusedButton.getName());
+				TalkBoxConfigurator.iconPanel.add(renewIcon);
+			}
+
+			// update focused button icon and name
+			focusedButton.setIcon(icon);
+			focusedButton.setName(img.getName());
+
+			// update icon tab
+			Container parent = img.getParent();
+			parent.remove(img);
+			parent.revalidate();
+			parent.repaint();
+
 		}
 
 	}
@@ -424,7 +440,7 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 
 	@Override
 	public int getNumberOfAudioButtons() {
-		return this.audioTabButtons.size();
+		return 0;
 	}
 
 	@Override
