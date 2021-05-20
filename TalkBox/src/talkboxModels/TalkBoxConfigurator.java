@@ -305,6 +305,14 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 					JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
 
 			if (confirmClear == JOptionPane.YES_OPTION) {
+				
+				for (TalkboxDemoButton t : demoButtons) {
+					JLabel renewIcon = new JLabel(t.getIconButton().getIcon());
+					renewIcon.addMouseListener(new SelectIcon());
+					renewIcon.setName(t.getIconButton().getName());
+					TalkBoxConfigurator.iconPanel.add(renewIcon);
+				}
+				
 				innerPanel.removeAll();
 				demoButtons.clear();
 				demoInnerPanelCounter = 12;
