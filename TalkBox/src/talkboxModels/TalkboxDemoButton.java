@@ -4,14 +4,15 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-
-import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+
+import talkboxModels.TalkBoxConfigurator.SelectIcon;
 
 /**
  * A helper class that holds the button and audio 
@@ -28,7 +29,6 @@ public class TalkboxDemoButton {
 	private JButton audioButton; // audio button
 	private JButton removeButton; // audio button
 	
-	//private Icon iconImage;
 	//private Clip audioClip;
 	
 	/*---------CONSTRUCTORS---------*/
@@ -127,22 +127,40 @@ public class TalkboxDemoButton {
 	/*---------BUTTON FUNCTIONALITY---------*/
 	
 	/**
-	 * Remove panel 
-	 * @author Zohair
-	 *
+	 * Remove panel that holds the icon button and audio button.
 	 */
 	private class RemoveDemo extends MouseAdapter {
 		
 		@Override
 		public void mouseClicked(MouseEvent e) {
-			JButton remove = ((JButton) e.getSource());
 			
+			JButton remove = ((JButton) e.getSource()); // the remove button
+			
+			// get icon currently in icon button and place it back in the icon tab
+			ImageIcon removedIcon = (ImageIcon) iconButton.getIcon();
+			JLabel renewIcon = new JLabel(removedIcon);
+			renewIcon.addMouseListener(new SelectIcon());
+			renewIcon.setName(iconButton.getName());
+			TalkBoxConfigurator.iconPanel.add(renewIcon);
+			TalkBoxConfigurator.status.setText("Removed button. " + ++TalkBoxConfigurator.demoInnerPanelCounter + " buttons remaining.");
+			TalkBoxConfigurator.addB.setEnabled(true);
+			
+			
+			// remove talkboxDemoButton from its ArrayList is the configurator
+			int i = 0;
+			TalkboxDemoButton removeDemoButton = TalkBoxConfigurator.demoButtons.get(i);
+			while (!removeDemoButton.getIconButton().equals(iconButton)) {
+				++i;
+				removeDemoButton = TalkBoxConfigurator.demoButtons.get(i);
+			}
+			TalkBoxConfigurator.demoButtons.remove(i);
+			
+			// remove the panel
 			Container parent = remove.getParent().getParent();
 			parent.remove(remove.getParent());
-			iconButton = null;
-			audioButton = null;
-			removeButton = null;
-			status = null;
+			
+			TalkBoxConfigurator.iconPanel.revalidate();
+			TalkBoxConfigurator.iconPanel.repaint();
 			parent.revalidate();
 			parent.repaint();
 		}
