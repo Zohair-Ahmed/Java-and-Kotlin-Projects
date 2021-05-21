@@ -7,11 +7,12 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import javax.swing.*;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.TimerTask;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import javax.imageio.ImageIO;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -32,24 +33,23 @@ public class TalkBoxConfigurator {
 
 	/*---------GLOBAL VARIABLES---------*/
 	private JFrame frame; // main frame
-	public static JPanel iconPanel = new JPanel(new GridLayout(0, 8, 10, 10));
-	private JPanel innerPanel = new JPanel(new GridLayout(0, 2, 10, 10)); // talkbox demo inner panel
-	static JLabel status = new JLabel("Welcome to the TalkBox Configurator!"); // status messages
 	private int width = 800; // width of main frame
 	private int height = 800; // height of main frame
+	private JPanel innerPanel = new JPanel(new GridLayout(0, 2, 10, 10)); // talkbox demo inner panel
+	public static JPanel iconPanel = new JPanel(new GridLayout(0, 8, 10, 10));
+	public static JLabel status = new JLabel("Welcome to the TalkBox Configurator!"); // status messages
 
-	public static ArrayList<TalkboxDemoButton> demoButtons = new ArrayList<TalkboxDemoButton>(); // talkbox demo buttons
+	public static int demoInnerPanelCounter = 12; // a total of 12 TalkBoxDemoButtons can be created
+	public static ArrayList<TalkboxDemoButton> demoButtons = new ArrayList<TalkboxDemoButton>(demoInnerPanelCounter);
 
 	// global so that when click, can mutate other panels
-	public static JButton addB = new JButton("Add new button"); // add new set of icon and audio for the TalkBox app //
-																// button
+	public static JButton addB = new JButton("Add new button"); // add new talkbox demo button
 	private JButton recordB = new JButton("Record my own Audio"); // record personal audio button
 	private JButton saveB = new JButton("Save"); // record personal audio button
 	private JButton clearB = new JButton("Clear"); // clear all buttons in the TalkBox app button
-	public static TalkboxDemoButton lastFocusedButton = new TalkboxDemoButton(); // used for adding audio (finding last
-																					// focused audio btn)
+	public static TalkboxDemoButton lastFocusedButton = new TalkboxDemoButton(); // used for adding audio
 
-	static int demoInnerPanelCounter = 12; // a total of 12 TalkBoxDemoButtons can be created
+	public static boolean isSaved = false;
 
 	/*---------MAIN METHOD---------*/
 
@@ -220,9 +220,11 @@ public class TalkBoxConfigurator {
 		// add the add, clear and record buttons
 		buttonPanel.add(addB);
 		addB.addActionListener(new AddDemoButton());
+		
 		buttonPanel.add(this.recordB);
 
 		buttonPanel.add(this.saveB);
+		this.saveB.addActionListener(new SaveButton());
 
 		buttonPanel.add(this.clearB);
 		this.clearB.addActionListener(new ClearDemoButton());
@@ -271,7 +273,7 @@ public class TalkBoxConfigurator {
 		return containerPanel;
 	}
 
-	/*---------BUTTON FUNCTIONALITY---------*/
+	/*--------- BUTTON FUNCTIONALITY ---------*/
 
 	/**
 	 * Functionality for the Add button on the left button panel. Adds a
@@ -286,11 +288,31 @@ public class TalkBoxConfigurator {
 				demoButtons.add(tdb);
 				demoInnerPanelCounter--;
 				status.setText("Added button. " + demoInnerPanelCounter + " buttons remaining.");
+				isSaved = false;
 			} else {
 				status.setText("Reached maximum button capacity.");
 				((JButton) arg0.getSource()).setEnabled(false);
 			}
 		}
+	}
+
+	private class SaveButton implements ActionListener {
+
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			isSaved = true;
+			try {
+				FileOutputStream demoBtnData = new FileOutputStream("demoBtnData");
+				ObjectOutputStream writeDemoBtns = new ObjectOutputStream(demoBtnData);
+				writeDemoBtns.writeObject(demoButtons);
+				writeDemoBtns.close();
+				demoBtnData.close();
+				status.setText("Configuration saved!");
+			} catch (IOException ioe) {
+				ioe.printStackTrace();
+			}
+		}
+
 	}
 
 	/**
@@ -303,16 +325,19 @@ public class TalkBoxConfigurator {
 		public void actionPerformed(ActionEvent arg0) {
 
 			int confirmClear = JOptionPane.showConfirmDialog(null, "Are you sure you want to clear?", "Clear Message",
-					JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+					JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
 			if (confirmClear == JOptionPane.YES_OPTION) {
 
+				isSaved = false;
+				
 				for (TalkboxDemoButton t : demoButtons) {
-					if (t.getIconButton().getIcon() != null) {
+					if (t.getIconButton().getIcon() != null || t.getAudioButton().getIcon() != null) {
 						JLabel renewIcon = new JLabel(t.getIconButton().getIcon());
 						renewIcon.addMouseListener(new SelectIcon());
 						renewIcon.setName(t.getIconButton().getName());
 						TalkBoxConfigurator.iconPanel.add(renewIcon);
+						t.setClip(null);
 					}
 				}
 
@@ -323,9 +348,7 @@ public class TalkBoxConfigurator {
 				innerPanel.updateUI();
 				addB.setEnabled(true);
 			}
-
 		}
-
 	}
 
 	/**
@@ -370,6 +393,8 @@ public class TalkBoxConfigurator {
 
 					} else if (clickCount == 2) {
 
+						isSaved = false;
+						
 						try {
 							BufferedImage soundImage = ImageIO.read(new File(".//icons/Sound.png"));
 							Icon icon = new ImageIcon(
@@ -416,6 +441,8 @@ public class TalkBoxConfigurator {
 				status.setText("Please choose an image button to have this icon"); // update status
 				return;
 			}
+			
+			isSaved = false;
 
 			focusedButton.setText(""); // remove button text
 			status.setText("Added " + img.getName()); // update status

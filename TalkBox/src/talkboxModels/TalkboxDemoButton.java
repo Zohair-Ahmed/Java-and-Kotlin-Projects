@@ -26,13 +26,13 @@ import talkboxModels.TalkBoxConfigurator.SelectIcon;
  * @author Zohair Ahmed
  */
 public class TalkboxDemoButton implements Serializable {
-
+	
 	/*---------GLOBAL VARIABLES---------*/
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L; //(static fields are not serialized)
 	private JButton iconButton; // icon button
-	private JButton audioButton; // audio button
-	private JButton removeButton; // audio button
-	public Clip audioClip;
+	private transient JButton audioButton; // audio button (transient means don't serialize)
+	private transient JButton removeButton; // remove button (transient means don't serialize)
+	private Clip audioClip;
 
 	/*---------CONSTRUCTORS---------*/
 
@@ -85,10 +85,6 @@ public class TalkboxDemoButton implements Serializable {
 	}
 
 	/*--------- ACCESSORS ---------*/
-	public void setClip(Clip audioClip) {
-		this.audioClip = audioClip;
-	}
-
 	/**
 	 * Returns the icon button
 	 * 
@@ -106,6 +102,20 @@ public class TalkboxDemoButton implements Serializable {
 	public JButton getAudioButton() {
 		return this.audioButton;
 	}
+	
+	/**
+	 * Returns this demo button's audio clip
+	 * 
+	 * @return - this demo button's audio clip
+	 */
+	public Clip getClip() {
+		return this.audioClip;
+	}
+	
+	@Override
+	public String toString() {
+		return "Icon: " + this.iconButton.getName() + ", Audio Clip: " + getClip().toString();
+	}
 
 	/**
 	 * A private helper method that returns the file extension of a file
@@ -122,10 +132,38 @@ public class TalkboxDemoButton implements Serializable {
 			return fileName.substring(fileName.lastIndexOf(".") + 1);
 
 		return "";
-
+	}
+	
+	/*--------- MUTATORS ---------*/
+	
+	/**
+	 * Sets the icon button of this demo button
+	 * 
+	 * @param iconButton - the icon button
+	 */
+	public void setIconButton (JButton iconButton) {
+		this.iconButton = iconButton;
+	}
+	
+	/**
+	 * Sets the audio button of this demo button
+	 * 
+	 * @param audioButton - the audio button
+	 */
+	public void setAudioButton (JButton audioButton) {
+		this.audioButton = audioButton;
+	}
+	
+	/**
+	 * Sets the clip of the demo button
+	 * 
+	 * @param audioClip - the audio clip
+	 */
+	public void setClip(Clip audioClip) {
+		this.audioClip = audioClip;
 	}
 
-	/*---------BUTTON FUNCTIONALITY---------*/
+	/*--------- BUTTON FUNCTIONALITY ---------*/
 
 	/**
 	 * Remove panel that holds the icon button and audio button.
@@ -155,6 +193,7 @@ public class TalkboxDemoButton implements Serializable {
 				removeDemoButton = TalkBoxConfigurator.demoButtons.get(i);
 			}
 			TalkBoxConfigurator.demoButtons.remove(i);
+			TalkBoxConfigurator.isSaved = false;
 
 			// remove the panel
 			Container parent = remove.getParent().getParent();
@@ -164,6 +203,7 @@ public class TalkboxDemoButton implements Serializable {
 			TalkBoxConfigurator.iconPanel.repaint();
 			parent.revalidate();
 			parent.repaint();
+			
 		}
 	}
 
