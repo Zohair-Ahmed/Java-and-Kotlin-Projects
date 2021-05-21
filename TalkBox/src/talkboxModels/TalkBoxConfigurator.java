@@ -16,6 +16,8 @@ import javax.imageio.ImageIO;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 
 /**
  * Aids those with speech impediments to communicate using a sound generating
@@ -26,7 +28,7 @@ import javax.sound.sampled.Clip;
  * 
  * @author Zohair Ahmed
  */
-public class TalkBoxConfigurator implements TalkBoxConfiguration {
+public class TalkBoxConfigurator {
 
 	/*---------GLOBAL VARIABLES---------*/
 	private static final long serialVersionUID = 1L;
@@ -41,13 +43,13 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 	public static ArrayList<TalkboxDemoButton> demoButtons = new ArrayList<TalkboxDemoButton>(); // talkbox demo buttons
 
 	// global so that when click, can mutate other panels
-	static JButton addB = new JButton("Add new button"); // add new set of icon and audio for the TalkBox app button
+	public static JButton addB = new JButton("Add new button"); // add new set of icon and audio for the TalkBox app
+																// button
 	private JButton recordB = new JButton("Record my own Audio"); // record personal audio button
 	private JButton saveB = new JButton("Save"); // record personal audio button
 	private JButton clearB = new JButton("Clear"); // clear all buttons in the TalkBox app button
+	public static Object lastFocusedButton;
 
-	private int numOfAudioSets; // number of audio sets
-	private int totalButtons; // buttons in total
 	static int demoInnerPanelCounter = 12; // a total of 12 TalkBoxDemoButtons can be created
 
 	/*---------MAIN METHOD---------*/
@@ -305,14 +307,16 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 					JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
 
 			if (confirmClear == JOptionPane.YES_OPTION) {
-				
+
 				for (TalkboxDemoButton t : demoButtons) {
-					JLabel renewIcon = new JLabel(t.getIconButton().getIcon());
-					renewIcon.addMouseListener(new SelectIcon());
-					renewIcon.setName(t.getIconButton().getName());
-					TalkBoxConfigurator.iconPanel.add(renewIcon);
+					if (t.getIconButton().getIcon() != null) {
+						JLabel renewIcon = new JLabel(t.getIconButton().getIcon());
+						renewIcon.addMouseListener(new SelectIcon());
+						renewIcon.setName(t.getIconButton().getName());
+						TalkBoxConfigurator.iconPanel.add(renewIcon);
+					}
 				}
-				
+
 				innerPanel.removeAll();
 				demoButtons.clear();
 				demoInnerPanelCounter = 12;
@@ -345,41 +349,34 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 				@Override
 				public void run() {
 
-					JButton thisButton = (((JButton) e.getSource()));
+					JButton thisButton = (((JButton) e.getSource())); // button of audio file
 					String buttonName = thisButton.getText();
+					String panelName = thisButton.getParent().getName();
 
+					// get audio file this buttons references
+					try {
+						audioIn = AudioSystem
+								.getAudioInputStream(new File(".//sounds/" + panelName + "/" + buttonName));
+						audio = AudioSystem.getClip();
+						audio.open(audioIn);
+					} catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+						e.printStackTrace();
+					}
+
+					// on single click play button, on double click store audio in desired button
 					if (clickCount == 1) {
 
-						String panelName = thisButton.getParent().getName();
+						status.setText(buttonName + " played");
+						audio.start();
+
+					} else if (clickCount == 2) {
 
 						try {
-							audioIn = AudioSystem
-									.getAudioInputStream(new File(".//sounds/" + panelName + "/" + buttonName));
-							audio = AudioSystem.getClip();
-							audio.open(audioIn);
-							status.setText(buttonName + " played");
-							audio.start();
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-
-					} else if (clickCount > 1) {
-
-						try {
-
 							BufferedImage soundImage = ImageIO.read(new File(".//icons/Sound.png"));
-							Icon icon = new ImageIcon(soundImage);
-
-							for (int i = 0; i < demoButtons.size(); i++) {
-
-								JButton innerButton = demoButtons.get(i).getIconButton();
-
-								if (innerButton.hasFocus()) {
-									innerButton.setText(buttonName);
-									innerButton.setIcon(icon);
-								}
-							}
-
+							Icon icon = new ImageIcon(
+									soundImage.getScaledInstance(50, 50, java.awt.Image.SCALE_SMOOTH));
+							((JButton) lastFocusedButton).setIcon(icon);
+							((JButton) lastFocusedButton).setText(thisButton.getText());
 						} catch (IOException e1) {
 							e1.printStackTrace();
 						}
@@ -404,18 +401,16 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 			// get icon clicked from icon tab
 			JLabel img = ((JLabel) e.getSource());
 			Icon icon = img.getIcon();
-			JButton focusedButton = null;
+			JButton focusedButton = demoButtons.get(0).getIconButton();
 
 			// search for focused button
 			try {
 				int i = 0;
-				focusedButton = demoButtons.get(i).getIconButton();
-				while (!focusedButton.hasFocus()) {
-					++i;
-					focusedButton = demoButtons.get(i).getIconButton();
-				}
+				while (!focusedButton.hasFocus())
+					focusedButton = demoButtons.get(i++).getIconButton();
+
 			} catch (IndexOutOfBoundsException | NullPointerException ex) {
-				status.setText("Please choose a button to have this icon"); // update status
+				status.setText("Please choose an image button to have this icon"); // update status
 				return;
 			}
 
@@ -442,34 +437,5 @@ public class TalkBoxConfigurator implements TalkBoxConfiguration {
 
 		}
 
-	}
-
-	/*--------- ACCESSORS ---------*/
-
-	@Override
-	public int getNumberOfAudioButtons() {
-		return 0;
-	}
-
-	@Override
-	public int getNumberOfAudioSets() {
-		return this.numOfAudioSets;
-	}
-
-	@Override
-	public int getTotalNumberOfButtons() {
-		return this.totalButtons;
-	}
-
-	@Override
-	public Path getRelativePathToAudioFiles() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String[][] getAudioFileNames() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 }
