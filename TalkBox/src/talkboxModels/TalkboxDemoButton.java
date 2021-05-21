@@ -9,9 +9,14 @@ import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -26,13 +31,14 @@ import talkboxModels.TalkBoxConfigurator.SelectIcon;
  * @author Zohair Ahmed
  */
 public class TalkboxDemoButton implements Serializable {
-	
+
 	/*---------GLOBAL VARIABLES---------*/
-	private static final long serialVersionUID = 1L; //(static fields are not serialized)
+	private static final long serialVersionUID = 1L; // (static fields are not serialized)
 	private JButton iconButton; // icon button
 	private transient JButton audioButton; // audio button (transient means don't serialize)
 	private transient JButton removeButton; // remove button (transient means don't serialize)
 	private Clip audioClip;
+	public File audioFile;
 
 	/*---------CONSTRUCTORS---------*/
 
@@ -48,6 +54,7 @@ public class TalkboxDemoButton implements Serializable {
 	public TalkboxDemoButton(JPanel p) {
 
 		this.iconButton = createButton("Icon");
+		this.iconButton.addMouseListener(new PlayAudio());
 
 		this.audioButton = createButton("Audio");
 		this.audioButton.addFocusListener(new getLastAudioButton());
@@ -102,7 +109,7 @@ public class TalkboxDemoButton implements Serializable {
 	public JButton getAudioButton() {
 		return this.audioButton;
 	}
-	
+
 	/**
 	 * Returns this demo button's audio clip
 	 * 
@@ -111,7 +118,7 @@ public class TalkboxDemoButton implements Serializable {
 	public Clip getClip() {
 		return this.audioClip;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "Icon: " + this.iconButton.getName() + ", Audio Clip: " + getClip().toString();
@@ -133,27 +140,27 @@ public class TalkboxDemoButton implements Serializable {
 
 		return "";
 	}
-	
+
 	/*--------- MUTATORS ---------*/
-	
+
 	/**
 	 * Sets the icon button of this demo button
 	 * 
 	 * @param iconButton - the icon button
 	 */
-	public void setIconButton (JButton iconButton) {
+	public void setIconButton(JButton iconButton) {
 		this.iconButton = iconButton;
 	}
-	
+
 	/**
 	 * Sets the audio button of this demo button
 	 * 
 	 * @param audioButton - the audio button
 	 */
-	public void setAudioButton (JButton audioButton) {
+	public void setAudioButton(JButton audioButton) {
 		this.audioButton = audioButton;
 	}
-	
+
 	/**
 	 * Sets the clip of the demo button
 	 * 
@@ -161,6 +168,10 @@ public class TalkboxDemoButton implements Serializable {
 	 */
 	public void setClip(Clip audioClip) {
 		this.audioClip = audioClip;
+	}
+
+	public void setAudioClip(File audioFile) {
+		this.audioFile = audioFile;
 	}
 
 	/*--------- BUTTON FUNCTIONALITY ---------*/
@@ -203,13 +214,13 @@ public class TalkboxDemoButton implements Serializable {
 			TalkBoxConfigurator.iconPanel.repaint();
 			parent.revalidate();
 			parent.repaint();
-			
+
 		}
 	}
 
 	/**
-	 * Used for when the focused is lost when user clicks on one of 
-	 * the audio buttons in the audio tab
+	 * Used for when the focused is lost when user clicks on one of the audio
+	 * buttons in the audio tab
 	 */
 	public class getLastAudioButton implements FocusListener {
 
@@ -221,6 +232,26 @@ public class TalkboxDemoButton implements Serializable {
 		public void focusLost(FocusEvent arg0) {
 			TalkBoxConfigurator.lastFocusedButton.audioButton = ((JButton) arg0.getSource());
 		}
+	}
 
+	/**
+	 * If an audio is added, plays the audio whenever the icon button is clicked
+	 */
+	private class PlayAudio extends MouseAdapter {
+
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			if (audioFile != null) {
+				try {
+					AudioInputStream audioIn = AudioSystem.getAudioInputStream(audioFile);
+					Clip audio = AudioSystem.getClip();
+					audio.open(audioIn);
+					audio.start();
+				} catch (UnsupportedAudioFileException | IOException | LineUnavailableException e1) {
+					e1.printStackTrace();
+				}
+			} else
+				TalkBoxConfigurator.status.setText("This Talkbox demo button has no audio.");
+		}
 	}
 }

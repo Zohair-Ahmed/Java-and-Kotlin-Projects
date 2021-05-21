@@ -296,6 +296,9 @@ public class TalkBoxConfigurator {
 		}
 	}
 
+	/**
+	 * Save the demo buttons
+	 */
 	private class SaveButton implements ActionListener {
 
 		@Override
@@ -337,7 +340,7 @@ public class TalkBoxConfigurator {
 						renewIcon.addMouseListener(new SelectIcon());
 						renewIcon.setName(t.getIconButton().getName());
 						TalkBoxConfigurator.iconPanel.add(renewIcon);
-						t.setClip(null);
+						t.setAudioClip(null);
 					}
 				}
 
@@ -374,11 +377,12 @@ public class TalkBoxConfigurator {
 					JButton thisButton = (((JButton) e.getSource())); // button of audio file
 					String buttonName = thisButton.getText();
 					String panelName = thisButton.getParent().getName();
+					File audioFile = new File(".//sounds/" + panelName + "/" + buttonName);
 
 					// get audio file this buttons references
 					try {
 						audioIn = AudioSystem
-								.getAudioInputStream(new File(".//sounds/" + panelName + "/" + buttonName));
+								.getAudioInputStream(audioFile);
 						audio = AudioSystem.getClip();
 						audio.open(audioIn);
 					} catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
@@ -403,7 +407,7 @@ public class TalkBoxConfigurator {
 							lastFocusedButton.getAudioButton().setHorizontalTextPosition(JButton.CENTER);
 							lastFocusedButton.getAudioButton().setVerticalTextPosition(JButton.BOTTOM);
 							lastFocusedButton.getAudioButton().setText(thisButton.getText());
-							lastFocusedButton.setClip(audio); // add this clip to its respective demo button
+							lastFocusedButton.setAudioClip(audioFile); // add this clip to its respective demo button
 
 						} catch (IOException e1) {
 							e1.printStackTrace();
