@@ -31,8 +31,6 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 public class TalkBoxConfigurator {
 
 	/*---------GLOBAL VARIABLES---------*/
-	private static final long serialVersionUID = 1L;
-
 	private JFrame frame; // main frame
 	public static JPanel iconPanel = new JPanel(new GridLayout(0, 8, 10, 10));
 	private JPanel innerPanel = new JPanel(new GridLayout(0, 2, 10, 10)); // talkbox demo inner panel
@@ -43,12 +41,13 @@ public class TalkBoxConfigurator {
 	public static ArrayList<TalkboxDemoButton> demoButtons = new ArrayList<TalkboxDemoButton>(); // talkbox demo buttons
 
 	// global so that when click, can mutate other panels
-	public static JButton addB = new JButton("Add new button"); // add new set of icon and audio for the TalkBox app
+	public static JButton addB = new JButton("Add new button"); // add new set of icon and audio for the TalkBox app //
 																// button
 	private JButton recordB = new JButton("Record my own Audio"); // record personal audio button
 	private JButton saveB = new JButton("Save"); // record personal audio button
 	private JButton clearB = new JButton("Clear"); // clear all buttons in the TalkBox app button
-	public static Object lastFocusedButton;
+	public static TalkboxDemoButton lastFocusedButton = new TalkboxDemoButton(); // used for adding audio (finding last
+																					// focused audio btn)
 
 	static int demoInnerPanelCounter = 12; // a total of 12 TalkBoxDemoButtons can be created
 
@@ -375,8 +374,12 @@ public class TalkBoxConfigurator {
 							BufferedImage soundImage = ImageIO.read(new File(".//icons/Sound.png"));
 							Icon icon = new ImageIcon(
 									soundImage.getScaledInstance(50, 50, java.awt.Image.SCALE_SMOOTH));
-							((JButton) lastFocusedButton).setIcon(icon);
-							((JButton) lastFocusedButton).setText(thisButton.getText());
+							lastFocusedButton.getAudioButton().setIcon(icon);
+							lastFocusedButton.getAudioButton().setHorizontalTextPosition(JButton.CENTER);
+							lastFocusedButton.getAudioButton().setVerticalTextPosition(JButton.BOTTOM);
+							lastFocusedButton.getAudioButton().setText(thisButton.getText());
+							lastFocusedButton.setClip(audio); // add this clip to its respective demo button
+
 						} catch (IOException e1) {
 							e1.printStackTrace();
 						}
@@ -436,6 +439,5 @@ public class TalkBoxConfigurator {
 			parent.repaint();
 
 		}
-
 	}
 }
