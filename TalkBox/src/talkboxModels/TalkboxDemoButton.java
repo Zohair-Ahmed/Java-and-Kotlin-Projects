@@ -4,9 +4,14 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.io.Serializable;
+
+import javax.sound.sampled.Clip;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -21,15 +26,16 @@ import talkboxModels.TalkBoxConfigurator.SelectIcon;
  * 
  * @author Zohair Ahmed
  */ 
-public class TalkboxDemoButton {
+public class TalkboxDemoButton implements Serializable {
 	
 	/*---------GLOBAL VARIABLES---------*/
+	private static final long serialVersionUID = 1L;
 	private String status;
 	private JButton iconButton; // icon button
 	private JButton audioButton; // audio button
 	private JButton removeButton; // audio button
 	
-	//private Clip audioClip;
+	public Clip audioClip;
 	
 	/*---------CONSTRUCTORS---------*/
 	
@@ -42,7 +48,10 @@ public class TalkboxDemoButton {
 	public TalkboxDemoButton(JPanel p) {
 		
 		this.iconButton = createButton("Icon");
+		
 		this.audioButton = createButton("Audio");
+		this.audioButton.addFocusListener(new getLastAudioButton());
+		
 		this.removeButton = new JButton("Remove");
 		this.removeButton.addMouseListener(new RemoveDemo());
 		
@@ -86,6 +95,10 @@ public class TalkboxDemoButton {
 	 */
 	private String getStatus() {
 		return this.status;
+	}
+	
+	public void setClip(Clip audioClip) {
+		this.audioClip = audioClip;
 	}
 	
 	/**
@@ -164,5 +177,21 @@ public class TalkboxDemoButton {
 			parent.revalidate();
 			parent.repaint();
 		}
+	}
+	
+	public class getLastAudioButton implements FocusListener {
+
+		@Override
+		public void focusGained(FocusEvent arg0) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void focusLost(FocusEvent arg0) {
+			JButton lastFocusedButton = ((JButton) arg0.getSource());
+			TalkBoxConfigurator.lastFocusedButton = lastFocusedButton;	
+		}
+		
 	}
 }
