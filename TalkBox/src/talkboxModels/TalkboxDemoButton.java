@@ -35,11 +35,11 @@ public class TalkboxDemoButton implements Serializable {
 	/*---------GLOBAL VARIABLES---------*/
 	private static final long serialVersionUID = 1L; // (static fields are not serialized)
 	private JButton iconButton; // icon button
-	private transient JButton audioButton; // audio button (transient means don't serialize)
+	private JButton audioButton; // audio button
 	private transient JButton removeButton; // remove button (transient means don't serialize)
-	private Clip audioClip;
-	public File audioFile;
-
+	public static String configPath = ""; // gets path of audio file for the audio button
+	private String thisAudioPath = ""; // sets THIS demo button to have audio file path in the static config path
+	private File audioFile = null; // audio file
 	/*---------CONSTRUCTORS---------*/
 
 	public TalkboxDemoButton() {
@@ -57,6 +57,7 @@ public class TalkboxDemoButton implements Serializable {
 		this.iconButton.addMouseListener(new PlayAudio());
 
 		this.audioButton = createButton("Audio");
+		this.audioButton.grabFocus();
 		this.audioButton.addFocusListener(new getLastAudioButton());
 
 		this.removeButton = new JButton("Remove");
@@ -111,17 +112,11 @@ public class TalkboxDemoButton implements Serializable {
 	}
 
 	/**
-	 * Returns this demo button's audio clip
-	 * 
-	 * @return - this demo button's audio clip
+	 * The name of the icon button and the file that plays the audio
 	 */
-	public Clip getClip() {
-		return this.audioClip;
-	}
-
 	@Override
 	public String toString() {
-		return "Icon: " + this.iconButton.getName() + ", Audio Clip: " + getClip().toString();
+		return "Icon: " + this.iconButton.getName() + ", Audio Clip: " + audioFile.getAbsolutePath();
 	}
 
 	/**
@@ -159,19 +154,6 @@ public class TalkboxDemoButton implements Serializable {
 	 */
 	public void setAudioButton(JButton audioButton) {
 		this.audioButton = audioButton;
-	}
-
-	/**
-	 * Sets the clip of the demo button
-	 * 
-	 * @param audioClip - the audio clip
-	 */
-	public void setClip(Clip audioClip) {
-		this.audioClip = audioClip;
-	}
-
-	public void setAudioClip(File audioFile) {
-		this.audioFile = audioFile;
 	}
 
 	/*--------- BUTTON FUNCTIONALITY ---------*/
@@ -241,17 +223,28 @@ public class TalkboxDemoButton implements Serializable {
 
 		@Override
 		public void mouseClicked(MouseEvent e) {
-			if (audioFile != null) {
+			
+			// if there is no audio file but there is an audio selected from this audio button
+			if (audioFile == null && configPath != "") {
+				thisAudioPath = configPath;
+				configPath = "";
+				audioFile = new File(thisAudioPath);
+			
+			} else if (audioFile != null) { // if audio file is present
 				try {
 					AudioInputStream audioIn = AudioSystem.getAudioInputStream(audioFile);
 					Clip audio = AudioSystem.getClip();
 					audio.open(audioIn);
 					audio.start();
+					TalkBoxConfigurator.status.setText(getAudioButton().getText() + " previewed");
 				} catch (UnsupportedAudioFileException | IOException | LineUnavailableException e1) {
 					e1.printStackTrace();
 				}
-			} else
+				
+			}
+			else // if there is no audio connected to this audio button
 				TalkBoxConfigurator.status.setText("This Talkbox demo button has no audio.");
+			
 		}
 	}
 }

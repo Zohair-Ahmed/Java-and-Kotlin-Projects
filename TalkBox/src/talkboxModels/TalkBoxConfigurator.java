@@ -340,7 +340,7 @@ public class TalkBoxConfigurator {
 						renewIcon.addMouseListener(new SelectIcon());
 						renewIcon.setName(t.getIconButton().getName());
 						TalkBoxConfigurator.iconPanel.add(renewIcon);
-						t.setAudioClip(null);
+						
 					}
 				}
 
@@ -407,13 +407,13 @@ public class TalkBoxConfigurator {
 							lastFocusedButton.getAudioButton().setHorizontalTextPosition(JButton.CENTER);
 							lastFocusedButton.getAudioButton().setVerticalTextPosition(JButton.BOTTOM);
 							lastFocusedButton.getAudioButton().setText(thisButton.getText());
-							lastFocusedButton.setAudioClip(audioFile); // add this clip to its respective demo button
+							TalkboxDemoButton.configPath = ".//sounds/" + panelName + "/" + buttonName;
 
 						} catch (IOException e1) {
 							e1.printStackTrace();
 						}
 
-						status.setText(buttonName + " added");
+						//status.setText(buttonName + " added");
 					}
 					clickCount = 0;
 				}
