@@ -7,14 +7,19 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 
 import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -25,6 +30,7 @@ public class TalkBoxSimulator {
 	private JFrame frame; // main frame
 	private int width = 800; // width of main frame
 	private int height = 800; // height of main frame
+	private File audioFile = null;
 
 	public static ArrayList<TalkboxDemoButton> demoButtons = new ArrayList<TalkboxDemoButton>(12);
 
@@ -121,7 +127,27 @@ public class TalkBoxSimulator {
 		JButton btn;
 
 		for (TalkboxDemoButton t : TalkBoxSimulator.demoButtons) {
-			btn = t.getIconButton();
+			btn = t.getIconButton();			
+			btn.addMouseListener(new MouseAdapter()
+			{
+				
+				public void mousePressed(MouseEvent e) {
+					
+					File thisFile = t.getAudioFile();
+					
+					try {
+						AudioInputStream audioIn = AudioSystem.getAudioInputStream(thisFile);
+						Clip audio = AudioSystem.getClip();
+						audio.open(audioIn);
+						audio.start();
+						TalkBoxConfigurator.status.setText(t.getAudioButton().getText() + " previewed");
+					} catch (UnsupportedAudioFileException | IOException | LineUnavailableException e1) {
+						e1.printStackTrace();
+					}
+				}
+				
+			});
+			
 			thisPnl.add(btn);
 		}
 	}
