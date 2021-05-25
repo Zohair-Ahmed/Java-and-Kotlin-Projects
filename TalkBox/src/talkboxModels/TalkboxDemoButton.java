@@ -36,7 +36,7 @@ public class TalkboxDemoButton implements Serializable {
 	private static final long serialVersionUID = 1L; // (static fields are not serialized)
 	private JButton iconButton; // icon button
 	private JButton audioButton; // audio button
-	private transient JButton removeButton; // remove button (transient means don't serialize)
+	private JButton removeButton; // remove button (transient means don't serialize)
 	public static String configPath = ""; // gets path of audio file for the audio button
 	private String thisAudioPath = ""; // sets THIS demo button to have audio file path in the static config path
 	private File audioFile = null; // audio file

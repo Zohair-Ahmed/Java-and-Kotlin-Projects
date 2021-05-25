@@ -25,11 +25,11 @@ public class TalkBoxSimulator {
 	private JFrame frame; // main frame
 	private int width = 800; // width of main frame
 	private int height = 800; // height of main frame
-	
+
 	public static ArrayList<TalkboxDemoButton> demoButtons = new ArrayList<TalkboxDemoButton>(12);
 
 	/*---------MAIN METHOD---------*/
-	
+
 	/**
 	 * Launch the application.
 	 */
@@ -45,9 +45,9 @@ public class TalkBoxSimulator {
 			}
 		});
 	}
-	
+
 	/*---------CONSTRUCTORS---------*/
-	
+
 	/**
 	 * Create the application.
 	 * 
@@ -57,14 +57,14 @@ public class TalkBoxSimulator {
 	public TalkBoxSimulator() {
 		initialize();
 	}
-	
+
 	/*---------USER INTERFACE---------*/
-	
+
 	/**
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		
+
 		// MAIN FRAME
 		this.frame = new JFrame("TalkBox Simulator");
 		this.frame.setPreferredSize(new Dimension(this.width, this.height));
@@ -72,63 +72,57 @@ public class TalkBoxSimulator {
 		this.frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		this.frame.setLayout(new BorderLayout());
 		this.frame.setMinimumSize(this.frame.getSize());
-		
+
 		// BUTTONS PANEL
 		JPanel btnsPanel = new JPanel(new GridLayout(0, 1, 10, 10));
-		btnsPanel.setBorder(BorderFactory.createEmptyBorder(this.height/10, this.width/10, this.height/10, this.width/10));
-		btnsPanel.setPreferredSize(new Dimension(3 * this.width/4, 3 * this.height/4));
+		btnsPanel.setBorder(
+				BorderFactory.createEmptyBorder(this.height / 10, this.width / 10, this.height / 10, this.width / 10));
+		btnsPanel.setPreferredSize(new Dimension(3 * this.width / 4, 3 * this.height / 4));
 		getDemoButtons();
 		addDemoButtons(btnsPanel);
-		
-		
+
 		this.frame.getContentPane().add(btnsPanel, BorderLayout.CENTER);
-		
+
 		this.frame.pack();
 		this.frame.setVisible(true);
 	}
-	
+
 	/**
 	 * Deserialize the demo buttons created in the most recently saved configuration
 	 */
 	private void getDemoButtons() {
-		
+
 		// deserialize configurator buttons
-        try
-        {
-            FileInputStream fis = new FileInputStream("demoBtnData");
-            ObjectInputStream ois = new ObjectInputStream(fis);
- 
-            TalkBoxSimulator.demoButtons = (ArrayList<TalkboxDemoButton>) ois.readObject();
- 
-            ois.close();
-            fis.close();
-        } 
-        catch (IOException ioe) 
-        {
-            ioe.printStackTrace();
-            return;
-        } 
-        catch (ClassNotFoundException c) 
-        {
-            System.out.println("Class not found");
-            c.printStackTrace();
-            return;
-        }
+		try {
+			FileInputStream fis = new FileInputStream("demoBtnData");
+			ObjectInputStream ois = new ObjectInputStream(fis);
+
+			TalkBoxSimulator.demoButtons = (ArrayList<TalkboxDemoButton>) ois.readObject();
+
+			ois.close();
+			fis.close();
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
+			return;
+		} catch (ClassNotFoundException c) {
+			System.out.println("Class not found");
+			c.printStackTrace();
+			return;
+		}
 	}
-	
+
 	/**
 	 * Add the demo buttons in the configuration
 	 * 
 	 * @param thisPnl - the panel to add the demo buttons
 	 */
 	private void addDemoButtons(JPanel thisPnl) {
-		
+
 		JButton btn;
-		//Clip btnClip;
-		
+
 		for (TalkboxDemoButton t : TalkBoxSimulator.demoButtons) {
 			btn = t.getIconButton();
 			thisPnl.add(btn);
-		}	
+		}
 	}
 }

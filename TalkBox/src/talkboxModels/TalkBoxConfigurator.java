@@ -10,8 +10,10 @@ import javax.swing.*;
 import java.util.ArrayList;
 import java.util.TimerTask;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import javax.imageio.ImageIO;
 import javax.sound.sampled.AudioInputStream;
@@ -111,6 +113,35 @@ public class TalkBoxConfigurator {
 
 		// STATUS PANEL
 		this.frame.getContentPane().add(BorderLayout.NORTH, statusPanel());
+
+		try {
+			FileInputStream fis = new FileInputStream("demoBtnData");
+			ObjectInputStream ois = new ObjectInputStream(fis);
+
+			TalkBoxConfigurator.demoButtons = (ArrayList<TalkboxDemoButton>) ois.readObject();
+
+			ois.close();
+			fis.close();
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
+			return;
+		} catch (ClassNotFoundException c) {
+			System.out.println("Class not found");
+			c.printStackTrace();
+			return;
+		}
+
+		for (TalkboxDemoButton t : TalkBoxSimulator.demoButtons) {
+
+//			TalkboxDemoButton addThis = new TalkboxDemoButton(this.innerPanel);
+//			addThis.setAudioButton(t.getAudioButton());
+//			addThis.setIconButton(t.getIconButton());
+
+			demoInnerPanelCounter--;
+
+		}
+		this.innerPanel.revalidate();
+		this.innerPanel.repaint();
 
 		this.frame.pack();
 		this.frame.setVisible(true);
@@ -220,7 +251,7 @@ public class TalkBoxConfigurator {
 		// add the add, clear and record buttons
 		buttonPanel.add(addB);
 		addB.addActionListener(new AddDemoButton());
-		
+
 		buttonPanel.add(this.recordB);
 
 		buttonPanel.add(this.saveB);
@@ -303,19 +334,25 @@ public class TalkBoxConfigurator {
 
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
-			isSaved = true;
-			try {
-				FileOutputStream demoBtnData = new FileOutputStream("demoBtnData");
-				ObjectOutputStream writeDemoBtns = new ObjectOutputStream(demoBtnData);
-				writeDemoBtns.writeObject(demoButtons);
-				writeDemoBtns.close();
-				demoBtnData.close();
-				status.setText("Configuration saved!");
-			} catch (IOException ioe) {
-				ioe.printStackTrace();
+
+			int confirmSave = JOptionPane.showConfirmDialog(null,
+					"Saving will overwrite your previous TalkBox. Are you sure you want to save?",
+					"Save Configuration?", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+			
+			if (confirmSave == JOptionPane.YES_OPTION) {
+				isSaved = true;
+				try {
+					FileOutputStream demoBtnData = new FileOutputStream("demoBtnData");
+					ObjectOutputStream writeDemoBtns = new ObjectOutputStream(demoBtnData);
+					writeDemoBtns.writeObject(demoButtons);
+					writeDemoBtns.close();
+					demoBtnData.close();
+					status.setText("Configuration saved!");
+				} catch (IOException ioe) {
+					ioe.printStackTrace();
+				}
 			}
 		}
-
 	}
 
 	/**
@@ -327,20 +364,20 @@ public class TalkBoxConfigurator {
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 
-			int confirmClear = JOptionPane.showConfirmDialog(null, "Are you sure you want to clear?", "Clear Message",
+			int confirmClear = JOptionPane.showConfirmDialog(null, "Are you sure you want to clear?", "Clear Configuration?",
 					JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
 			if (confirmClear == JOptionPane.YES_OPTION) {
 
 				isSaved = false;
-				
+
 				for (TalkboxDemoButton t : demoButtons) {
 					if (t.getIconButton().getIcon() != null || t.getAudioButton().getIcon() != null) {
 						JLabel renewIcon = new JLabel(t.getIconButton().getIcon());
 						renewIcon.addMouseListener(new SelectIcon());
 						renewIcon.setName(t.getIconButton().getName());
 						TalkBoxConfigurator.iconPanel.add(renewIcon);
-						
+
 					}
 				}
 
@@ -381,8 +418,7 @@ public class TalkBoxConfigurator {
 
 					// get audio file this buttons references
 					try {
-						audioIn = AudioSystem
-								.getAudioInputStream(audioFile);
+						audioIn = AudioSystem.getAudioInputStream(audioFile);
 						audio = AudioSystem.getClip();
 						audio.open(audioIn);
 					} catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
@@ -398,7 +434,7 @@ public class TalkBoxConfigurator {
 					} else if (clickCount == 2) {
 
 						isSaved = false;
-						
+
 						try {
 							BufferedImage soundImage = ImageIO.read(new File(".//icons/Sound.png"));
 							Icon icon = new ImageIcon(
@@ -413,7 +449,7 @@ public class TalkBoxConfigurator {
 							e1.printStackTrace();
 						}
 
-						//status.setText(buttonName + " added");
+						// status.setText(buttonName + " added");
 					}
 					clickCount = 0;
 				}
@@ -445,7 +481,7 @@ public class TalkBoxConfigurator {
 				status.setText("Please choose an image button to have this icon"); // update status
 				return;
 			}
-			
+
 			isSaved = false;
 
 			focusedButton.setText(""); // remove button text
