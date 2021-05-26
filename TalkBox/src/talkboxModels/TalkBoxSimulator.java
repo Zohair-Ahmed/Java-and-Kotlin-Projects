@@ -127,27 +127,27 @@ public class TalkBoxSimulator {
 		JButton btn;
 
 		for (TalkboxDemoButton t : TalkBoxSimulator.demoButtons) {
-			btn = t.getIconButton();			
-			btn.addMouseListener(new MouseAdapter()
-			{
-				
+			btn = t.getIconButton();
+			System.out.println(t.getAudioPath());
+			btn.addMouseListener(new MouseAdapter() {
+
 				public void mousePressed(MouseEvent e) {
-					
-					File thisFile = t.getAudioFile();
-					
+
+					AudioInputStream audioIn;
+					audioFile = new File(t.getAudioPath());
 					try {
-						AudioInputStream audioIn = AudioSystem.getAudioInputStream(thisFile);
+						audioIn = AudioSystem.getAudioInputStream(audioFile);
 						Clip audio = AudioSystem.getClip();
 						audio.open(audioIn);
 						audio.start();
-						TalkBoxConfigurator.status.setText(t.getAudioButton().getText() + " previewed");
-					} catch (UnsupportedAudioFileException | IOException | LineUnavailableException e1) {
-						e1.printStackTrace();
+					} catch (UnsupportedAudioFileException | IOException | LineUnavailableException ex) {
+						ex.printStackTrace();
 					}
+
 				}
-				
+
 			});
-			
+
 			thisPnl.add(btn);
 		}
 	}

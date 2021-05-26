@@ -112,6 +112,24 @@ public class TalkboxDemoButton implements Serializable {
 	}
 
 	/**
+	 * Returns the audio file
+	 * 
+	 * @return - the audio file
+	 */
+	public File getAudioFile() {
+		return this.audioFile;
+	}
+
+	/**
+	 * Returns the audio path
+	 * 
+	 * @return - the audio path
+	 */
+	public String getAudioPath() {
+		return this.thisAudioPath;
+	}
+
+	/**
 	 * The name of the icon button and the file that plays the audio
 	 */
 	@Override
@@ -223,28 +241,33 @@ public class TalkboxDemoButton implements Serializable {
 
 		@Override
 		public void mouseClicked(MouseEvent e) {
-			
-			// if there is no audio file but there is an audio selected from this audio button
-			if (audioFile == null && configPath != "") {
+
+			AudioInputStream audioIn;
+			Clip audio;
+
+			// if no audio is selected
+			if (audioButton.getIcon() == null) {
+				TalkBoxConfigurator.status.setText("This Talkbox demo button has no audio.");
+				return;
+			}
+
+			// if the button was clicked and a new sound file was being added
+			if (!configPath.equals("")) {
 				thisAudioPath = configPath;
 				configPath = "";
 				audioFile = new File(thisAudioPath);
-			
-			} else if (audioFile != null) { // if audio file is present
-				try {
-					AudioInputStream audioIn = AudioSystem.getAudioInputStream(audioFile);
-					Clip audio = AudioSystem.getClip();
-					audio.open(audioIn);
-					audio.start();
-					TalkBoxConfigurator.status.setText(getAudioButton().getText() + " previewed");
-				} catch (UnsupportedAudioFileException | IOException | LineUnavailableException e1) {
-					e1.printStackTrace();
-				}
-				
 			}
-			else // if there is no audio connected to this audio button
-				TalkBoxConfigurator.status.setText("This Talkbox demo button has no audio.");
-			
+
+			// play audio if file exists
+			try {
+				audioIn = AudioSystem.getAudioInputStream(audioFile);
+				audio = AudioSystem.getClip();
+				audio.open(audioIn);
+				audio.start();
+				TalkBoxConfigurator.status.setText(getAudioButton().getText() + " previewed");
+			} catch (UnsupportedAudioFileException | IOException | LineUnavailableException e1) {
+				e1.printStackTrace();
+			}
 		}
 	}
 }

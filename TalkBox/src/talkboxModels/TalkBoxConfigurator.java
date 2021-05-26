@@ -114,32 +114,33 @@ public class TalkBoxConfigurator {
 		// STATUS PANEL
 		this.frame.getContentPane().add(BorderLayout.NORTH, statusPanel());
 
-		try {
-			FileInputStream fis = new FileInputStream("demoBtnData");
-			ObjectInputStream ois = new ObjectInputStream(fis);
-
-			TalkBoxConfigurator.demoButtons = (ArrayList<TalkboxDemoButton>) ois.readObject();
-
-			ois.close();
-			fis.close();
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
-			return;
-		} catch (ClassNotFoundException c) {
-			System.out.println("Class not found");
-			c.printStackTrace();
-			return;
-		}
-
-		for (TalkboxDemoButton t : TalkBoxSimulator.demoButtons) {
-
+//		try {
+//			FileInputStream fis = new FileInputStream("demoBtnData");
+//			ObjectInputStream ois = new ObjectInputStream(fis);
+//
+//			TalkBoxConfigurator.demoButtons = (ArrayList<TalkboxDemoButton>) ois.readObject();
+//
+//			ois.close();
+//			fis.close();
+//		} catch (IOException ioe) {
+//			ioe.printStackTrace();
+//			return;
+//		} catch (ClassNotFoundException c) {
+//			System.out.println("Class not found");
+//			c.printStackTrace();
+//			return;
+//		}
+//
+//		for (TalkboxDemoButton t : TalkBoxSimulator.demoButtons) {
+//
 //			TalkboxDemoButton addThis = new TalkboxDemoButton(this.innerPanel);
 //			addThis.setAudioButton(t.getAudioButton());
 //			addThis.setIconButton(t.getIconButton());
-
-			demoInnerPanelCounter--;
-
-		}
+//
+//			demoInnerPanelCounter--;
+//
+//		}
+		
 		this.innerPanel.revalidate();
 		this.innerPanel.repaint();
 
@@ -335,22 +336,26 @@ public class TalkBoxConfigurator {
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 
-			int confirmSave = JOptionPane.showConfirmDialog(null,
+			if (isSaved == false) {
+				int confirmSave = JOptionPane.showConfirmDialog(null,
 					"Saving will overwrite your previous TalkBox. Are you sure you want to save?",
 					"Save Configuration?", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-			
-			if (confirmSave == JOptionPane.YES_OPTION) {
-				isSaved = true;
-				try {
-					FileOutputStream demoBtnData = new FileOutputStream("demoBtnData");
-					ObjectOutputStream writeDemoBtns = new ObjectOutputStream(demoBtnData);
-					writeDemoBtns.writeObject(demoButtons);
-					writeDemoBtns.close();
-					demoBtnData.close();
-					status.setText("Configuration saved!");
-				} catch (IOException ioe) {
-					ioe.printStackTrace();
+				
+				if (confirmSave == JOptionPane.YES_OPTION) {
+					isSaved = true;
+					try {
+						FileOutputStream demoBtnData = new FileOutputStream("demoBtnData");
+						ObjectOutputStream writeDemoBtns = new ObjectOutputStream(demoBtnData);
+						writeDemoBtns.writeObject(demoButtons);
+						writeDemoBtns.close();
+						demoBtnData.close();
+						status.setText("Configuration saved!");
+					} catch (IOException ioe) {
+						ioe.printStackTrace();
+					}
 				}
+			} else {
+				status.setText("TalkBox Demo already up to date!");
 			}
 		}
 	}
@@ -444,6 +449,7 @@ public class TalkBoxConfigurator {
 							lastFocusedButton.getAudioButton().setVerticalTextPosition(JButton.BOTTOM);
 							lastFocusedButton.getAudioButton().setText(thisButton.getText());
 							TalkboxDemoButton.configPath = ".//sounds/" + panelName + "/" + buttonName;
+							status.setText(buttonName + " added"); // update status
 
 						} catch (IOException e1) {
 							e1.printStackTrace();
