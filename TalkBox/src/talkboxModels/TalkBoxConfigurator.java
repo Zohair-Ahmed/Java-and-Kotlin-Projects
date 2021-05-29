@@ -5,6 +5,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import javax.swing.*;
 import java.util.ArrayList;
@@ -41,22 +43,22 @@ public class TalkBoxConfigurator {
 	private int width = 800; // width of main frame
 	private int height = 800; // height of main frame
 	private JPanel innerPanel = new JPanel(new GridLayout(0, 2, 10, 10)); // talkbox demo inner panel
-	public static JPanel iconPanel = new JPanel(new GridLayout(0, 8, 10, 10));
+	public static JPanel iconPanel = new JPanel(new GridLayout(0, 8, 10, 10)); // icon panel
 	public static JLabel status = new JLabel("Welcome to the TalkBox Configurator!"); // status messages
 
 	public static int demoInnerPanelCounter = 12; // a total of 12 TalkBoxDemoButtons can be created
 	public static ArrayList<TalkboxDemoButton> demoButtons = new ArrayList<TalkboxDemoButton>(demoInnerPanelCounter);
 
 	// global so that when click, can mutate other panels
-	private JButton openSim = new JButton("Open Simulator");
+	private JButton openSim = new JButton("Open Simulator"); // open the simulator
 	public static JButton addB = new JButton("Add new button"); // add new talkbox demo button
 	private JButton recordB = new JButton("Record my own Audio"); // record personal audio button
 	private JButton saveB = new JButton("Save"); // record personal audio button
 	private JButton clearB = new JButton("Clear"); // clear all buttons in the TalkBox app button
-	private JButton help = new JButton("Help");
+	private JButton help = new JButton("Help"); // how to use the config
 	public static TalkboxDemoButton lastFocusedButton = new TalkboxDemoButton(); // used for adding audio
 
-	public static boolean isSaved = false;
+	public static boolean isSaved = true;
 
 	/*---------MAIN METHOD---------*/
 
@@ -99,7 +101,7 @@ public class TalkBoxConfigurator {
 		this.frame = new JFrame("TalkBox Configurator");
 		this.frame.setPreferredSize(new Dimension(this.width, this.height));
 		this.frame.setLocationByPlatform(true);
-		this.frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		this.frame.addWindowListener(new ConfirmClose());
 		this.frame.setLayout(new BorderLayout());
 		this.frame.setMinimumSize(this.frame.getSize());
 
@@ -118,33 +120,6 @@ public class TalkBoxConfigurator {
 
 		// STATUS PANEL
 		this.frame.getContentPane().add(BorderLayout.NORTH, statusPanel());
-
-//		try {
-//			FileInputStream fis = new FileInputStream("demoBtnData");
-//			ObjectInputStream ois = new ObjectInputStream(fis);
-//
-//			TalkBoxConfigurator.demoButtons = (ArrayList<TalkboxDemoButton>) ois.readObject();
-//
-//			ois.close();
-//			fis.close();
-//		} catch (IOException ioe) {
-//			ioe.printStackTrace();
-//			return;
-//		} catch (ClassNotFoundException c) {
-//			System.out.println("Class not found");
-//			c.printStackTrace();
-//			return;
-//		}
-//
-//		for (TalkboxDemoButton t : TalkBoxSimulator.demoButtons) {
-//
-//			TalkboxDemoButton addThis = new TalkboxDemoButton(this.innerPanel);
-//			addThis.setAudioButton(t.getAudioButton());
-//			addThis.setIconButton(t.getIconButton());
-//
-//			demoInnerPanelCounter--;
-//
-//		}
 
 		this.innerPanel.revalidate();
 		this.innerPanel.repaint();
@@ -319,6 +294,33 @@ public class TalkBoxConfigurator {
 	/*--------- BUTTON FUNCTIONALITY ---------*/
 
 	/**
+	 * Close the window
+	 */
+	private class ConfirmClose extends WindowAdapter {
+
+		public void windowClosing(WindowEvent e) {
+			if (isSaved == false) {
+				int confirmClose = JOptionPane.showConfirmDialog(null,
+						"You have not saved your current configuration. Do you want to save this configuration?",
+						"Close Configration?", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+
+				if (confirmClose == JOptionPane.YES_OPTION) {
+					isSaved = true;
+					try {
+						FileOutputStream demoBtnData = new FileOutputStream("demoBtnData");
+						ObjectOutputStream writeDemoBtns = new ObjectOutputStream(demoBtnData);
+						writeDemoBtns.writeObject(demoButtons);
+						writeDemoBtns.close();
+						demoBtnData.close();
+					} catch (IOException ioe) {
+						ioe.printStackTrace();
+					}
+				}
+			}
+		}
+	}
+
+	/**
 	 * Open the simulator
 	 */
 	private class OpenSim implements ActionListener {
@@ -343,19 +345,19 @@ public class TalkBoxConfigurator {
 						ioe.printStackTrace();
 					}
 				}
+			}
 
-				if (isSaved == true) {
-					EventQueue.invokeLater(new Runnable() {
-						public void run() {
-							try {
-								TalkBoxSimulator window = new TalkBoxSimulator();
-								window.frame.setVisible(true);
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
+			if (isSaved == true) {
+				EventQueue.invokeLater(new Runnable() {
+					public void run() {
+						try {
+							TalkBoxSimulator window = new TalkBoxSimulator();
+							window.frame.setVisible(true);
+						} catch (Exception e) {
+							e.printStackTrace();
 						}
-					});
-				}
+					}
+				});
 			}
 		}
 	}
