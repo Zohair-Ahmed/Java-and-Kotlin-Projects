@@ -174,6 +174,15 @@ public class TalkboxDemoButton implements Serializable {
 		this.audioButton = audioButton;
 	}
 
+	/**
+	 * Sets the audio path of this demo button
+	 * 
+	 * @param audioPath - the audio path of this demo button
+	 */
+	public void setAudioPath(String audioPath) {
+		this.thisAudioPath = audioPath;
+	}
+
 	/*--------- BUTTON FUNCTIONALITY ---------*/
 
 	/**

@@ -9,9 +9,12 @@ import java.awt.image.BufferedImage;
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.TimerTask;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -45,10 +48,12 @@ public class TalkBoxConfigurator {
 	public static ArrayList<TalkboxDemoButton> demoButtons = new ArrayList<TalkboxDemoButton>(demoInnerPanelCounter);
 
 	// global so that when click, can mutate other panels
+	private JButton openSim = new JButton("Open Simulator");
 	public static JButton addB = new JButton("Add new button"); // add new talkbox demo button
 	private JButton recordB = new JButton("Record my own Audio"); // record personal audio button
 	private JButton saveB = new JButton("Save"); // record personal audio button
 	private JButton clearB = new JButton("Clear"); // clear all buttons in the TalkBox app button
+	private JButton help = new JButton("Help");
 	public static TalkboxDemoButton lastFocusedButton = new TalkboxDemoButton(); // used for adding audio
 
 	public static boolean isSaved = false;
@@ -140,7 +145,7 @@ public class TalkBoxConfigurator {
 //			demoInnerPanelCounter--;
 //
 //		}
-		
+
 		this.innerPanel.revalidate();
 		this.innerPanel.repaint();
 
@@ -163,7 +168,7 @@ public class TalkBoxConfigurator {
 		iconPanel.setBackground(Color.WHITE);
 
 		// access icon file
-		File iconFile = new File(".//icons/");
+		File iconFile = new File(".//resources/icons/");
 
 		// for every icon, create a button that takes shape of the respective icon
 		BufferedImage buttonImg = null; // image of button
@@ -172,7 +177,7 @@ public class TalkBoxConfigurator {
 			try {
 				filename = file.getName();
 				if (filename.endsWith(".png") && !filename.equals("Sound.png")) {
-					buttonImg = ImageIO.read(new File(".//icons/" + file.getName()));
+					buttonImg = ImageIO.read(new File(".//resources/icons/" + file.getName()));
 					JLabel img = new JLabel(
 							new ImageIcon(buttonImg.getScaledInstance(50, 50, java.awt.Image.SCALE_SMOOTH)));
 					img.setName(file.getName());
@@ -206,7 +211,7 @@ public class TalkBoxConfigurator {
 		audioPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
 		// access sound file
-		File soundFile = new File(".//sounds");
+		File soundFile = new File(".//resources/sounds");
 
 		// for every sub-directory in the sounds file,
 		// create a sub-panel for the sub-directory
@@ -249,7 +254,10 @@ public class TalkBoxConfigurator {
 		JPanel buttonPanel = new JPanel(new GridLayout(0, 1, 10, 10));
 		buttonPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 10, 10));
 
-		// add the add, clear and record buttons
+		// add the buttons for the button panel
+		buttonPanel.add(this.openSim);
+		this.openSim.addActionListener(new OpenSim());
+
 		buttonPanel.add(addB);
 		addB.addActionListener(new AddDemoButton());
 
@@ -260,6 +268,9 @@ public class TalkBoxConfigurator {
 
 		buttonPanel.add(this.clearB);
 		this.clearB.addActionListener(new ClearDemoButton());
+
+		buttonPanel.add(this.help);
+		this.help.addActionListener(new Help());
 
 		return buttonPanel;
 	}
@@ -308,6 +319,48 @@ public class TalkBoxConfigurator {
 	/*--------- BUTTON FUNCTIONALITY ---------*/
 
 	/**
+	 * Open the simulator
+	 */
+	private class OpenSim implements ActionListener {
+
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+
+			if (isSaved == false) {
+				int openWOSave = JOptionPane.showConfirmDialog(null,
+						"You have not saved your current configuration. Do you want to save this configuration?",
+						"Open Simulator?", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+
+				if (openWOSave == JOptionPane.YES_OPTION) {
+					isSaved = true;
+					try {
+						FileOutputStream demoBtnData = new FileOutputStream("demoBtnData");
+						ObjectOutputStream writeDemoBtns = new ObjectOutputStream(demoBtnData);
+						writeDemoBtns.writeObject(demoButtons);
+						writeDemoBtns.close();
+						demoBtnData.close();
+					} catch (IOException ioe) {
+						ioe.printStackTrace();
+					}
+				}
+
+				if (isSaved == true) {
+					EventQueue.invokeLater(new Runnable() {
+						public void run() {
+							try {
+								TalkBoxSimulator window = new TalkBoxSimulator();
+								window.frame.setVisible(true);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					});
+				}
+			}
+		}
+	}
+
+	/**
 	 * Functionality for the Add button on the left button panel. Adds a
 	 * TalkboxDemoButton to the inner JPanel
 	 */
@@ -338,9 +391,9 @@ public class TalkBoxConfigurator {
 
 			if (isSaved == false) {
 				int confirmSave = JOptionPane.showConfirmDialog(null,
-					"Saving will overwrite your previous TalkBox. Are you sure you want to save?",
-					"Save Configuration?", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-				
+						"Saving will overwrite your previous TalkBox. Are you sure you want to save?",
+						"Save Configuration?", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+
 				if (confirmSave == JOptionPane.YES_OPTION) {
 					isSaved = true;
 					try {
@@ -369,8 +422,8 @@ public class TalkBoxConfigurator {
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 
-			int confirmClear = JOptionPane.showConfirmDialog(null, "Are you sure you want to clear?", "Clear Configuration?",
-					JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+			int confirmClear = JOptionPane.showConfirmDialog(null, "Are you sure you want to clear?",
+					"Clear Configuration?", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
 			if (confirmClear == JOptionPane.YES_OPTION) {
 
@@ -397,6 +450,39 @@ public class TalkBoxConfigurator {
 	}
 
 	/**
+	 * How to use the configuration
+	 */
+	private class Help implements ActionListener {
+
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+
+			JFrame helpFrame = new JFrame();
+			helpFrame.setPreferredSize(new Dimension(650, 500));
+			helpFrame.setLocationByPlatform(true);
+			helpFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+			helpFrame.setLayout(new CardLayout());
+
+			JTextPane helpText = new JTextPane();
+
+			try {
+				FileReader readHelp = new FileReader(".//resources/Help.txt");
+				helpText.read(readHelp, "//resources/Help.txt");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+			helpText.setEditable(false);
+			helpText.setAutoscrolls(true);
+
+			helpFrame.add(helpText);
+			helpFrame.pack();
+			helpFrame.setVisible(true);
+
+		}
+	}
+
+	/**
 	 * Play audio when the respective buttons in the audio tabs is clicked If single
 	 * click, play audio; if double clicked, add audio
 	 */
@@ -419,7 +505,7 @@ public class TalkBoxConfigurator {
 					JButton thisButton = (((JButton) e.getSource())); // button of audio file
 					String buttonName = thisButton.getText();
 					String panelName = thisButton.getParent().getName();
-					File audioFile = new File(".//sounds/" + panelName + "/" + buttonName);
+					File audioFile = new File(".//resources/sounds/" + panelName + "/" + buttonName);
 
 					// get audio file this buttons references
 					try {
@@ -441,21 +527,19 @@ public class TalkBoxConfigurator {
 						isSaved = false;
 
 						try {
-							BufferedImage soundImage = ImageIO.read(new File(".//icons/Sound.png"));
+							BufferedImage soundImage = ImageIO.read(new File(".//resources/icons/Sound.png"));
 							Icon icon = new ImageIcon(
 									soundImage.getScaledInstance(50, 50, java.awt.Image.SCALE_SMOOTH));
 							lastFocusedButton.getAudioButton().setIcon(icon);
 							lastFocusedButton.getAudioButton().setHorizontalTextPosition(JButton.CENTER);
 							lastFocusedButton.getAudioButton().setVerticalTextPosition(JButton.BOTTOM);
 							lastFocusedButton.getAudioButton().setText(thisButton.getText());
-							TalkboxDemoButton.configPath = ".//sounds/" + panelName + "/" + buttonName;
+							TalkboxDemoButton.configPath = ".//resources/sounds/" + panelName + "/" + buttonName;
+							lastFocusedButton.setAudioPath(TalkboxDemoButton.configPath);
 							status.setText(buttonName + " added"); // update status
-
 						} catch (IOException e1) {
 							e1.printStackTrace();
 						}
-
-						// status.setText(buttonName + " added");
 					}
 					clickCount = 0;
 				}

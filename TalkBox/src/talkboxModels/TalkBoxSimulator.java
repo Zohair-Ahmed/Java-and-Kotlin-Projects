@@ -27,7 +27,7 @@ import javax.swing.JPanel;
 
 public class TalkBoxSimulator {
 
-	private JFrame frame; // main frame
+	public JFrame frame; // main frame
 	private int width = 800; // width of main frame
 	private int height = 800; // height of main frame
 	private File audioFile = null;
@@ -128,7 +128,6 @@ public class TalkBoxSimulator {
 
 		for (TalkboxDemoButton t : TalkBoxSimulator.demoButtons) {
 			btn = t.getIconButton();
-			System.out.println(t.getAudioPath());
 			btn.addMouseListener(new MouseAdapter() {
 
 				public void mousePressed(MouseEvent e) {
