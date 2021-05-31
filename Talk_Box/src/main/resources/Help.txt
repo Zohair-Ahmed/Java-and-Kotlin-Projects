@@ -1,0 +1,29 @@
+                                           Welcome to the Talkbox Configuration!
+
+ HOW TO:
+     1. Add demo button
+     2. Click on the desired icon demo button. Then click on an icon of your choice from the Icon tab.
+     3. Click on the desired audio demo button. 
+         Then click on an audio button once to preview the audio, 
+         twice to select it to the last chosen audio demo button. 
+         You could also record your own audio by clicking on the 
+         'Record my own Audio' button on the left panel.
+     4. Save.
+     5. Repeat until you have created your TalkBox!
+
+ BUTTON PANEL:
+     - Open Simulator -> Opens the simulator where you can use your Talkbox
+     - Add New Button -> Allows you to customize the icons and audio of your audio buttons
+     - Record my own Audio -> Record your own audio
+     - Save -> Save the current configuration
+     - Clear -> Clear the current configuration
+     
+ DEMO BUTTON:
+     - The left button is where the icon is to be displayed.
+        Click on the icon button, select an icon to be used
+        for your simulator.
+     - The right button is where the audio is to be displayed.
+        Click on the audio button of your choice, than click on
+        the audio button of your choice in the audio tab once to
+        preview the sound, twice to select the audio. Then click
+        on the respective icon button to solidify your choice.
