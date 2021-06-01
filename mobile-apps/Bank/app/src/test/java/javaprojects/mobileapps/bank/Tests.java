@@ -72,11 +72,7 @@ public class Tests {
     public void test_03a() {
         Bank b = new Bank();
 
-        /*
-         * A bank's status is defined in the "Status of Bank" section of your lab PDF instructions.
-         */
         String status = b.getStatus();
-        /* status of an empty bank */
         assertEquals("Accounts: {}", status);
 
         /* Print statement from a non-existing account. */
@@ -87,16 +83,16 @@ public class Tests {
         /* deposit to a non-existing account */
         b.deposit("Heeyeon", 300.05);
         assertEquals("Error: To-Account Heeyeon does not exist", b.getStatus());
-        b.deposit("Jiyoon", -300.05); /* error of non-existing to-account takes priority (see error tables in PDF instructions) */
+        b.deposit("Jiyoon", -300.05); /* error of non-existing to-account takes priority */
         assertEquals("Error: To-Account Jiyoon does not exist", b.getStatus());
 
         /* withdraw from a non-existing account */
         b.withdraw("Heeyeon", 10.5);
         assertEquals("Error: From-Account Heeyeon does not exist", b.getStatus());
-        b.withdraw("Jiyoon", -300.05); /* error of non-existing from-account takes priority (see error tables in PDF instructions) */
+        b.withdraw("Jiyoon", -300.05); /* error of non-existing from-account takes priority */
         assertEquals("Error: From-Account Jiyoon does not exist", b.getStatus());
 
-        /* transfer between two non-existing accounts: error of from-account takes priority (see error tables in PDF instructions) */
+        /* transfer between two non-existing accounts: error of from-account takes priority */
         b.transfer("Heeyeon", "Jiyoon", 100.24);
         assertEquals("Error: From-Account Heeyeon does not exist", b.getStatus());
         b.transfer("Jiyoon", "Heeyeon", -100.24);
@@ -116,10 +112,6 @@ public class Tests {
 
         String expectedStatus = "Accounts: {Heeyeon: $213.40}";
         assertEquals(expectedStatus, b.getStatus());
-        /*
-         * Recall: A client's statement summarizes
-         * their current status followed by their history list of transactions.
-         */
         String[] expectedHeeyeonStmt1 = {"Heeyeon: $213.40"};
         /* The added account Heeyeon has no transactions yet. */
         assertArrayEquals(expectedHeeyeonStmt1, b.getStatement("Heeyeon"));
@@ -167,12 +159,12 @@ public class Tests {
         expectedStatus = "Error: From-Account Jackie does not exist";
         assertEquals(expectedStatus, b.getStatus()); /* status of bank after the unsuccessful print of a client's statement */
 
-        b.addClient("Suyeon", 181.72); /* here Suyeon is a duplicated name, but the max capacity error takes priority (see error tables in PDF instructions) */
+        b.addClient("Suyeon", 181.72); /* here Suyeon is a duplicated name, but the max capacity error takes priority */
         assertEquals("Error: Maximum Number of Accounts Reached", b.getStatus());
         String[] expectedSuyeonStmt1 = {"Suyeon: $590.10"}; /* the error does not change suyeon's status */
         assertArrayEquals(expectedSuyeonStmt1, b.getStatement("Suyeon")); /* after an error, account statement stays unchanged */
 
-        b.addClient("Sunhye", 0); /* here Sunhye is a duplicated name, and the balance is non-positive, but the max capacity error takes priority (see error tables in PDF instructions) */
+        b.addClient("Sunhye", 0); /* here Sunhye is a duplicated name, and the balance is non-positive, but the max capacity error takes priority */
         assertEquals("Error: Maximum Number of Accounts Reached", b.getStatus());
         String[] expectedSunhyeStmt1 = {"Sunhye: $332.60"}; /* the error does not change sunhye's status */
         assertArrayEquals(expectedSunhyeStmt1, b.getStatement("Sunhye")); /* after an error, account statement stays unchanged */
@@ -218,9 +210,9 @@ public class Tests {
 
         /* at this point, Heeyeon's account balance is 312.32 */
 
-        b.transfer("Alan", "Mark", -234.23); /* non-existing from-account name takes priority (see error tables in PDF instructions) */
+        b.transfer("Alan", "Mark", -234.23); /* non-existing from-account name takes priority */
         assertEquals("Error: From-Account Alan does not exist", b.getStatus());
-        b.transfer("Heeyeon", "Mark", -234.23); /* non-existing to-account name takes priority (see error tables in PDF instructions) */
+        b.transfer("Heeyeon", "Mark", -234.23); /* non-existing to-account name takes priority */
         assertEquals("Error: To-Account Mark does not exist", b.getStatus());
         b.transfer("Heeyeon", "Yuna", 0);
         assertEquals("Error: Non-Positive Amount", b.getStatus());
