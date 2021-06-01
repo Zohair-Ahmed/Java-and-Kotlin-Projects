@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Bank of JavaProjects</string>
+
+    // service type spinner
+    <string-array name="actions">
+        <item>Deposit</item>
+        <item>Withdraw</item>
+        <item>Transfer</item>
+        <item>Print Statement</item>
+    </string-array>
+</resources>
