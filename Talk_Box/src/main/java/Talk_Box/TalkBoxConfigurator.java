@@ -139,7 +139,6 @@ public class TalkBoxConfigurator {
 		iconPanel.setBackground(Color.WHITE);
 
 		// access icon file
-//		File iconFile = new File(".//resources/icons/");
 		File iconFile = new File("src/main/resources/icons");
 
 		// for every icon, create a button that takes shape of the respective icon
@@ -183,7 +182,6 @@ public class TalkBoxConfigurator {
 		audioPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
 		// access sound file
-//		File soundFile = new File(".//resources/sounds");
 		File soundFile = new File("src/main/resources/sounds");
 
 		// for every sub-directory in the sounds file,
@@ -466,8 +464,6 @@ public class TalkBoxConfigurator {
 			JTextPane helpText = new JTextPane();
 
 			try {
-//				FileReader readHelp = new FileReader(".//resources/Help.txt");
-//				helpText.read(readHelp, "//resources/Help.txt");
 				FileReader readHelp = new FileReader("src/main/resources/Help.txt");
 				helpText.read(readHelp, "src/main/resources/Help.txt");
 			} catch (IOException e) {
@@ -507,7 +503,6 @@ public class TalkBoxConfigurator {
 					JButton thisButton = (((JButton) e.getSource())); // button of audio file
 					String buttonName = thisButton.getText();
 					String panelName = thisButton.getParent().getName();
-//					File audioFile = new File(".//resources/sounds/" + panelName + "/" + buttonName);
 					File audioFile = new File("src/main/resources/sounds/" + panelName + "/" + buttonName);
 
 					// get audio file this buttons references
@@ -530,7 +525,6 @@ public class TalkBoxConfigurator {
 						isSaved = false;
 
 						try {
-//							BufferedImage soundImage = ImageIO.read(new File(".//resources/icons/Sound.png"));
 							BufferedImage soundImage = ImageIO.read(new File("src/main/resources/icons/Sound.png"));
 							Icon icon = new ImageIcon(
 									soundImage.getScaledInstance(50, 50, java.awt.Image.SCALE_SMOOTH));

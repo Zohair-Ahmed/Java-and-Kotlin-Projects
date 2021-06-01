@@ -84,7 +84,6 @@ public class TalkBoxSimulator {
 		addDemoButtons(btnsPanel);
 
 		this.frame.getContentPane().add(btnsPanel, BorderLayout.CENTER);
-
 		this.frame.pack();
 		this.frame.setVisible(true);
 	}
@@ -139,9 +138,7 @@ public class TalkBoxSimulator {
 					} catch (UnsupportedAudioFileException | IOException | LineUnavailableException ex) {
 						ex.printStackTrace();
 					}
-
 				}
-
 			});
 
 			thisPnl.add(btn);

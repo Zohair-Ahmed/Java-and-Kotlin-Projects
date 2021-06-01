@@ -134,23 +134,6 @@ public class TalkboxDemoButton implements Serializable {
 		return "Icon: " + this.iconButton.getName() + ", Audio Clip: " + audioFile.getAbsolutePath();
 	}
 
-	/**
-	 * A private helper method that returns the file extension of a file
-	 * 
-	 * @param file - the Path of the file
-	 * 
-	 * @return - the file extension
-	 */
-	private String getFileExtension(File file) {
-
-		String fileName = file.getName();
-
-		if (fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0)
-			return fileName.substring(fileName.lastIndexOf(".") + 1);
-
-		return "";
-	}
-
 	/*--------- MUTATORS ---------*/
 
 	/**
