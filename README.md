@@ -1,5 +1,8 @@
 # Java and Kotlin Projects
 
+## Kotlin
+To be updated!
+
 ## Java
 ### Talk_Box
 Aids those with speech impediments to communicate using a sound generating device called the TalkBox. Users will first run the TalkBoxConfigurator where they can modify which buttons to add to their TalkBox and the sound it can generate. After this is complete, the user runs the TalkBox simulator where the customized sound generating device is displayed.
@@ -15,6 +18,3 @@ A mobile app where users can create a bank account, and withdraw, deposit and tr
 A mobile app where users can play Tic-Tac-Toe
 
 ![Mobile App - TicTacToe](https://user-images.githubusercontent.com/64754081/151688815-abbbbe59-e662-42c9-a07b-a9f65f680ee0.jpg)
-
-## Kotlin
-To be updated!
